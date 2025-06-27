@@ -227,7 +227,7 @@ export default function AdminTicketsPage() {
                 {ticket.screenshots && ticket.screenshots.length > 0 && (
                   <div className="mt-4">
                     <p className="text-sm font-medium mb-2">
-                      Captures d'écran:
+                      Captures d&apos;écran:
                     </p>
                     <div className="flex gap-2">
                       {ticket.screenshots.map((screenshot, index) => (

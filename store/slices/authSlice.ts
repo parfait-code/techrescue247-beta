@@ -5,7 +5,7 @@ interface User {
     id: string;
     name: string;
     email: string;
-    role: 'client' | 'admin';
+    role: 'user' | 'admin'; // Changé de 'client' à 'user' pour correspondre au modèle MongoDB
 }
 
 interface AuthState {

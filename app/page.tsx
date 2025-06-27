@@ -34,7 +34,7 @@ export default function HomePage() {
             <p className="text-xl mb-8">
               Résolvons ensemble vos problèmes informatiques
             </p>
-            <Link href="/register">
+            <Link href="/login">
               <Button size="lg" variant="secondary">
                 Créer un ticket maintenant
               </Button>
