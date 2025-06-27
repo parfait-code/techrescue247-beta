@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Upload } from "lucide-react";
+import { useAppDispatch, useTickets } from "@/store/hooks";
+import { createTicket } from "@/store/slices/ticketSlice";
 
 const ticketSchema = z.object({
   title: z.string().min(5, "Le titre doit contenir au moins 5 caractères"),
@@ -39,8 +41,10 @@ type TicketData = z.infer<typeof ticketSchema>;
 
 export default function NewTicketPage() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { isLoading } = useTickets();
   const [files, setFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const {
     register,
@@ -56,69 +60,74 @@ export default function NewTicketPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      setFiles(Array.from(e.target.files));
+      const selectedFiles = Array.from(e.target.files);
+      if (selectedFiles.length > 3) {
+        toast.error("Vous ne pouvez télécharger que 3 fichiers maximum");
+        return;
+      }
+      setFiles(selectedFiles);
     }
+  };
+
+  const uploadFiles = async () => {
+    const screenshots: string[] = [];
+
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (uploadResponse.ok) {
+          const { url } = await uploadResponse.json();
+          screenshots.push(url);
+        } else {
+          throw new Error("Erreur lors du téléchargement");
+        }
+      } catch (error) {
+        toast.error(`Erreur lors du téléchargement de ${file.name}`);
+      }
+    }
+
+    return screenshots;
   };
 
   const onSubmit = async (data: TicketData) => {
-    setIsLoading(true);
+    setIsUploading(true);
+
     try {
-      // Upload files first if any
-      const screenshots: string[] = [];
-
+      // Upload des fichiers si présents
+      let screenshots: string[] = [];
       if (files.length > 0) {
-        for (const file of files) {
-          const formData = new FormData();
-          formData.append("file", file);
-
-          const uploadResponse = await fetch("/api/upload", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (uploadResponse.ok) {
-            const { url } = await uploadResponse.json();
-            screenshots.push(url);
-          }
-        }
+        screenshots = await uploadFiles();
       }
 
-      // Create ticket
-      const response = await fetch("/api/tickets", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      // Créer le ticket via Redux
+      const result = await dispatch(
+        createTicket({
           ...data,
           screenshots,
-        }),
-      });
+        })
+      ).unwrap();
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result.message || "Erreur lors de la création du ticket"
-        );
-      }
-
-      toast.success("Ticket créé avec succès", {
-        description: "Nous vous contacterons bientôt",
-      });
-
+      // Redirection après succès
       router.push("/dashboard/tickets");
-    } catch (error: any) {
-      toast.error("Erreur", {
-        description:
-          error.message ||
-          "Une erreur est survenue lors de la création du ticket",
-      });
+    } catch (error) {
+      // Les erreurs sont déjà gérées dans le slice
+      console.error("Erreur lors de la création:", error);
     } finally {
-      setIsLoading(false);
+      setIsUploading(false);
     }
   };
 
+  const isSubmitting = isLoading || isUploading;
+
   return (
-    <div>
+    <div className="max-w-2xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Créer un nouveau ticket</h1>
 
       <Card>
@@ -135,9 +144,10 @@ export default function NewTicketPage() {
               <Label htmlFor="title">Titre du problème</Label>
               <Input
                 id="title"
-                placeholder="Ex: Mon ordinateur ne démarre plus"
+                placeholder="Ex: Problème de connexion au serveur"
                 {...register("title")}
                 className="mt-1"
+                disabled={isSubmitting}
               />
               {errors.title && (
                 <p className="text-sm text-red-600 mt-1">
@@ -154,6 +164,7 @@ export default function NewTicketPage() {
                 rows={6}
                 {...register("description")}
                 className="mt-1"
+                disabled={isSubmitting}
               />
               {errors.description && (
                 <p className="text-sm text-red-600 mt-1">
@@ -162,79 +173,105 @@ export default function NewTicketPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="priority">Priorité</Label>
-                <Select
-                  onValueChange={(value) => setValue("priority", value as any)}
-                  defaultValue="medium"
-                >
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Sélectionnez la priorité" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Faible</SelectItem>
-                    <SelectItem value="medium">Moyenne</SelectItem>
-                    <SelectItem value="high">Élevée</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
-                  </SelectContent>
-                </Select>
-                {errors.priority && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {errors.priority.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="+237 6XX XXX XXX"
-                  {...register("phone")}
-                  className="mt-1"
-                />
-                {errors.phone && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {errors.phone.message}
-                  </p>
-                )}
-              </div>
+            <div>
+              <Label htmlFor="priority">Priorité</Label>
+              <Select
+                defaultValue="medium"
+                onValueChange={(value) => setValue("priority", value as any)}
+                disabled={isSubmitting}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Sélectionnez la priorité" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Faible</SelectItem>
+                  <SelectItem value="medium">Moyenne</SelectItem>
+                  <SelectItem value="high">Élevée</SelectItem>
+                  <SelectItem value="urgent">Urgente</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.priority && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.priority.message}
+                </p>
+              )}
             </div>
 
             <div>
-              <Label htmlFor="screenshots">
-                Captures d&apos;écran (optionnel)
-              </Label>
-              <div className="mt-1">
-                <label
-                  htmlFor="file-upload"
-                  className="flex items-center justify-center w-full px-4 py-2 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400"
-                >
-                  <Upload className="w-5 h-5 mr-2" />
-                  <span>Cliquez pour ajouter des images</span>
+              <Label htmlFor="phone">Numéro de téléphone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="Ex: 0123456789"
+                {...register("phone")}
+                className="mt-1"
+                disabled={isSubmitting}
+              />
+              {errors.phone && (
+                <p className="text-sm text-red-600 mt-1">
+                  {errors.phone.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="screenshots">Captures d'écran (optionnel)</Label>
+              <div className="mt-1 flex items-center gap-4">
+                <label className="cursor-pointer">
                   <input
-                    id="file-upload"
-                    name="file-upload"
+                    id="screenshots"
                     type="file"
-                    className="sr-only"
                     multiple
                     accept="image/*"
                     onChange={handleFileChange}
+                    className="hidden"
+                    disabled={isSubmitting}
                   />
+                  <div className="flex items-center gap-2 px-4 py-2 border rounded-md hover:bg-gray-50">
+                    <Upload className="w-4 h-4" />
+                    <span className="text-sm">
+                      {files.length > 0
+                        ? `${files.length} fichier(s) sélectionné(s)`
+                        : "Ajouter des captures"}
+                    </span>
+                  </div>
                 </label>
                 {files.length > 0 && (
-                  <p className="mt-2 text-sm text-gray-600">
-                    {files.length} fichier(s) sélectionné(s)
-                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setFiles([])}
+                    className="text-sm text-red-600 hover:text-red-800"
+                    disabled={isSubmitting}
+                  >
+                    Supprimer
+                  </button>
                 )}
               </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Max 3 fichiers, formats acceptés: JPG, PNG, GIF
+              </p>
             </div>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Création..." : "Créer le ticket"}
-            </Button>
+            <div className="flex gap-4">
+              <Button type="submit" className="flex-1" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Création en cours...
+                  </>
+                ) : (
+                  "Créer le ticket"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.back()}
+                disabled={isSubmitting}
+              >
+                Annuler
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>

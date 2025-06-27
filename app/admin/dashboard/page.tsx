@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -8,67 +9,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Ticket, Users, Clock } from "lucide-react";
+import { Ticket, Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { formatDate, getStatusColor, getPriorityColor } from "@/lib/utils";
-
-interface DashboardStats {
-  totalTickets: number;
-  openTickets: number;
-  inProgressTickets: number;
-  resolvedTickets: number;
-  totalUsers: number;
-  recentTickets: any[];
-}
+import { useAppDispatch, useTickets, useUsers } from "@/store/hooks";
+import { fetchTickets } from "@/store/slices/ticketSlice";
+import { fetchUsers } from "@/store/slices/userSlice";
 
 export default function AdminDashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
-    totalTickets: 0,
-    openTickets: 0,
-    inProgressTickets: 0,
-    resolvedTickets: 0,
-    totalUsers: 0,
-    recentTickets: [],
-  });
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { tickets, stats, isLoading: ticketsLoading } = useTickets();
+  const { users, isLoading: usersLoading } = useUsers();
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    // Charger les données nécessaires
+    dispatch(fetchTickets());
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
-  const fetchDashboardData = async () => {
-    try {
-      // Fetch tickets
-      const ticketsResponse = await fetch("/api/tickets");
-      const tickets = await ticketsResponse.json();
+  // Récupérer les tickets récents (5 derniers)
+  const recentTickets = tickets.slice(0, 5);
 
-      // Fetch users
-      const usersResponse = await fetch("/api/users");
-      const users = await usersResponse.json();
+  const isLoading = ticketsLoading || usersLoading;
 
-      // Calculate stats
-      const stats: DashboardStats = {
-        totalTickets: tickets.length,
-        openTickets: tickets.filter((t: any) => t.status === "open").length,
-        inProgressTickets: tickets.filter(
-          (t: any) => t.status === "in-progress"
-        ).length,
-        resolvedTickets: tickets.filter((t: any) => t.status === "resolved")
-          .length,
-        totalUsers: users.length,
-        recentTickets: tickets.slice(0, 5),
-      };
-
-      setStats(stats);
-    } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  if (isLoading && tickets.length === 0 && users.length === 0) {
     return (
-      <div className="flex justify-center items-center h-64">Chargement...</div>
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      </div>
     );
   }
 
@@ -79,7 +46,7 @@ export default function AdminDashboardPage() {
       </h1>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
@@ -87,32 +54,48 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalTickets}</div>
+            <p className="text-xs text-muted-foreground">Tous les tickets</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Tickets Ouverts
-            </CardTitle>
-            <Clock className="h-4 w-4 text-blue-600" />
+            <CardTitle className="text-sm font-medium">Ouverts</CardTitle>
+            <AlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
-              {stats.openTickets}
-            </div>
+            <div className="text-2xl font-bold">{stats.openTickets}</div>
+            <p className="text-xs text-muted-foreground">
+              {((stats.openTickets / stats.totalTickets) * 100 || 0).toFixed(0)}
+              % du total
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En Cours</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
+            <CardTitle className="text-sm font-medium">En cours</CardTitle>
+            <Clock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">
-              {stats.inProgressTickets}
-            </div>
+            <div className="text-2xl font-bold">{stats.inProgressTickets}</div>
+            <p className="text-xs text-muted-foreground">En traitement</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Résolus</CardTitle>
+            <CheckCircle className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.resolvedTickets}</div>
+            <p className="text-xs text-muted-foreground">
+              {(
+                (stats.resolvedTickets / stats.totalTickets) * 100 || 0
+              ).toFixed(0)}
+              % résolus
+            </p>
           </CardContent>
         </Card>
 
@@ -122,7 +105,8 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
+            <div className="text-2xl font-bold">{users.length}</div>
+            <p className="text-xs text-muted-foreground">Comptes actifs</p>
           </CardContent>
         </Card>
       </div>
@@ -134,40 +118,117 @@ export default function AdminDashboardPage() {
           <CardDescription>Les 5 derniers tickets créés</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {stats.recentTickets.map((ticket) => (
-              <div
-                key={ticket._id}
-                className="flex items-center justify-between p-4 border rounded-lg"
-              >
-                <div className="flex-1">
-                  <h4 className="font-semibold">{ticket.title}</h4>
-                  <p className="text-sm text-gray-600">
-                    Par {ticket.userId?.name || "Utilisateur"} -{" "}
-                    {formatDate(ticket.createdAt)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      ticket.status
-                    )}`}
-                  >
-                    {ticket.status}
-                  </span>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                      ticket.priority
-                    )}`}
-                  >
-                    {ticket.priority}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          {recentTickets.length === 0 ? (
+            <p className="text-center text-gray-600 py-8">
+              Aucun ticket pour le moment
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {recentTickets.map((ticket) => (
+                <Link
+                  key={ticket._id}
+                  href={`/admin/tickets`}
+                  className="block"
+                >
+                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex-1">
+                      <h4 className="font-semibold">{ticket.title}</h4>
+                      <p className="text-sm text-gray-600">
+                        Par {ticket.userId?.name || "Utilisateur supprimé"} -{" "}
+                        {formatDate(ticket.createdAt)}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {ticket.description.substring(0, 100)}
+                        {ticket.description.length > 100 && "..."}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                          ticket.status
+                        )}`}
+                      >
+                        {ticket.status === "open" && "Ouvert"}
+                        {ticket.status === "in-progress" && "En cours"}
+                        {ticket.status === "resolved" && "Résolu"}
+                        {ticket.status === "closed" && "Fermé"}
+                      </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
+                          ticket.priority
+                        )}`}
+                      >
+                        {ticket.priority === "low" && "Faible"}
+                        {ticket.priority === "medium" && "Moyen"}
+                        {ticket.priority === "high" && "Élevé"}
+                        {ticket.priority === "urgent" && "Urgent"}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Actions rapides */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Actions rapides</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Link href="/admin/tickets" className="block">
+              <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                → Gérer tous les tickets
+              </button>
+            </Link>
+            <Link href="/admin/users" className="block">
+              <button className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                → Gérer les utilisateurs
+              </button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Statistiques rapides</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">
+                  Taux de résolution
+                </span>
+                <span className="text-sm font-medium">
+                  {(
+                    (stats.resolvedTickets / stats.totalTickets) * 100 || 0
+                  ).toFixed(1)}
+                  %
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Tickets urgents</span>
+                <span className="text-sm font-medium">
+                  {
+                    tickets.filter(
+                      (t) => t.priority === "urgent" && t.status !== "closed"
+                    ).length
+                  }
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-600">Admins actifs</span>
+                <span className="text-sm font-medium">
+                  {users.filter((u) => u.role === "admin").length}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
