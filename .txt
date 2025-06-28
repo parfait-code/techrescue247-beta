@@ -1,0 +1,214 @@
+#first service Network Infrastructure
+        title: "Network Infrastructure",
+        description: "Design and secure your local networks for optimal and protected connectivity. We analyze your needs, design the appropriate network architecture and implement robust and scalable solutions.",
+        shortDescription: "Design and secure your local networks for optimal and protected connectivity.",
+        features: [
+            "LAN/WAN Architecture",
+            "Advanced Security",
+            "Continuous Monitoring",
+            "24/7 Support"
+        ],
+        benefits: [
+            "Network performance improvement up to 80%",
+            "Downtime reduction by 95%",
+            "Enhanced security against cyberattacks",
+            "Guaranteed scalability for future growth",
+            "Expert technical support available 24/7"
+        ],
+        process: [
+            {
+                title: "Initial Audit",
+                description: "Complete evaluation of your current network infrastructure and identification of improvement points."
+            },
+            {
+                title: "Design",
+                description: "Creation of a custom network architecture adapted to your specific needs and growth."
+            },
+            {
+                title: "Deployment",
+                description: "Installation and configuration of equipment with progressive migration to avoid interruptions."
+            },
+            {
+                title: "Optimization",
+                description: "Performance testing, fine adjustments and implementation of continuous monitoring."
+            }
+        ],
+        technologies: [
+            "Cisco", "Juniper", "Fortinet", "Palo Alto", "Aruba", "Ubiquiti",
+            "VLAN", "VPN", "Firewall", "Load Balancing", "QoS", "SD-WAN"
+        ],
+        faq: [
+            {
+                question: "How long does it take to install a new network infrastructure?",
+                answer: "The timeline varies according to complexity: 1-2 weeks for a simple network, 4-8 weeks for an advanced architecture. We plan the installation to minimize impact on your business."
+            },
+            {
+                question: "Can I keep my current equipment?",
+                answer: "We evaluate your existing equipment during the audit. Those that are compatible and in good condition can be integrated into the new architecture to optimize your investment."
+            },
+            {
+                question: "How do you guarantee the security of our network?",
+                answer: "We implement next-generation firewalls, network segmentation, data encryption, and 24/7 monitoring with intrusion detection."
+            }
+        ],
+
+#second services: Cloud Migration
+        title: "Cloud Migration",
+        description: "Complete support to migrate your systems to the cloud without service interruption. We develop a personalized migration strategy, manage the transition and optimize your cloud costs.",
+        shortDescription: "Complete support to migrate your systems to the cloud without service interruption.",
+        features: [
+            "Preliminary audit",
+            "Migration strategy",
+            "AWS/Azure/GCP",
+            "Team training"
+        ],
+        benefits: [
+            "IT cost reduction up to 40%",
+            "Improved flexibility and scalability",
+            "Access to latest cloud technologies",
+            "Enhanced data security",
+            "Optimized remote work capabilities"
+        ],
+        process: [
+            {
+                title: "Assessment",
+                description: "In-depth analysis of your current infrastructure and cloud compatibility evaluation."
+            },
+            {
+                title: "Strategy",
+                description: "Definition of migration roadmap with application prioritization and cloud provider selection."
+            },
+            {
+                title: "Migration",
+                description: "Phased migration execution with rigorous testing and validation at each step."
+            },
+            {
+                title: "Optimization",
+                description: "Resource adjustment, cost optimization and implementation of cloud best practices."
+            }
+        ],
+        technologies: [
+            "AWS", "Microsoft Azure", "Google Cloud", "Docker", "Kubernetes",
+            "Terraform", "Ansible", "Jenkins", "GitLab CI/CD", "Monitoring"
+        ],
+        faq: [
+            {
+                question: "What is the typical duration of a cloud migration?",
+                answer: "It depends on complexity: 1-3 months for a simple migration, 6-12 months for a complete transformation. We proceed in phases to maintain service continuity."
+            },
+            {
+                question: "How do you choose the right cloud provider?",
+                answer: "We analyze your technical needs, budget, regulatory constraints and preferences. AWS, Azure and GCP each have their advantages depending on the context."
+            },
+            {
+                question: "What happens if the migration fails?",
+                answer: "We have a rollback plan for each phase. Our migrations are tested in staging environment before production, minimizing risks."
+            }
+        ]
+
+#third service: Infrastructure Management
+        title: "Infrastructure Management",
+        description: "Optimization and supervision of your infrastructures for maximum performance and controlled costs. Proactive monitoring, preventive maintenance and expert support to guarantee system availability.",
+        shortDescription: "Optimization and supervision of your infrastructures for maximum performance and controlled costs.",
+        features: [
+            "Advanced monitoring",
+            "Cost optimization",
+            "Automation",
+            "Backup & recovery"
+        ],
+        benefits: [
+            "System availability guaranteed at 99.9%",
+            "Operational cost reduction by 30%",
+            "Proactive problem detection",
+            "Automation of repetitive tasks",
+            "Robust business continuity plan"
+        ],
+        process: [
+            {
+                title: "Assessment",
+                description: "Complete audit of your current infrastructure and optimization point identification."
+            },
+            {
+                title: "Implementation",
+                description: "Installation of monitoring, automation and backup tools adapted to your environment."
+            },
+            {
+                title: "Supervision",
+                description: "24/7 monitoring with proactive alerts and rapid intervention in case of incident."
+            },
+            {
+                title: "Improvement",
+                description: "Continuous optimization based on metrics and feedback."
+            }
+        ],
+        technologies: [
+            "Prometheus", "Grafana", "Nagios", "Zabbix", "ELK Stack",
+            "Terraform", "Ansible", "Puppet", "Docker", "VMware"
+        ],
+        faq: [
+            {
+                question: "What does 24/7 monitoring include?",
+                answer: "Continuous surveillance of servers, applications, network and databases with immediate alerts and on-call intervention if necessary."
+            },
+            {
+                question: "How do you manage backups?",
+                answer: "Automated daily backups with configurable retention, secure storage and regular restoration tests to guarantee data recovery."
+            },
+            {
+                question: "Can I keep my internal IT team?",
+                answer: "Absolutely. We work in collaboration with your teams, bringing our complementary expertise and training them in best practices."
+            }
+        ]
+fourth service: Application Development
+        title: "Application Development",
+        description: "Creation of custom business applications adapted to your company's specific needs. From needs analysis to deployment, we develop high-performance and scalable solutions.",
+        shortDescription: "Creation of custom business applications adapted to your company's specific needs.",,
+        features: [
+            "Web applications",
+            "Mobile solutions",
+            "APIs & integrations",
+            "Evolutionary maintenance"
+        ],
+        benefits: [
+            "Business process automation",
+            "Team productivity improvement",
+            "Intuitive user interface",
+            "Integration with existing systems",
+            "Scalability and facilitated maintenance"
+        ],
+        process: [
+            {
+                title: "Analysis",
+                description: "In-depth study of your business needs and definition of functional specifications."
+            },
+            {
+                title: "Design",
+                description: "UX/UI design and technical architecture adapted to your constraints and objectives."
+            },
+            {
+                title: "Development",
+                description: "Agile development with iterative deliveries and continuous validation with your teams."
+            },
+            {
+                title: "Deployment",
+                description: "Secure production deployment with user training and startup support."
+            }
+        ],
+        technologies: [
+            "React", "Node.js", "Python", "PHP", "Java", ".NET",
+            "MySQL", "PostgreSQL", "MongoDB", "AWS", "Docker", "REST API"
+        ],
+        faq: [
+            {
+                question: "How long does application development take?",
+                answer: "It varies according to complexity: 2-3 months for a simple app, 6-12 months for a complete solution. We deliver iteratively to validate regularly."
+            },
+            {
+                question: "Can you integrate our application with our existing tools?",
+                answer: "Yes, we develop APIs and connectors to integrate your new application with your existing ERP, CRM or other business tools."
+            },
+            {
+                question: "What does evolutionary maintenance include?",
+                answer: "Bug fixes, security updates, small functional evolutions and continuous technical support according to the chosen service level."
+            }
+        ],
