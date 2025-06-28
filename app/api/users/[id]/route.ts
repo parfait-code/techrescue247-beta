@@ -69,7 +69,7 @@ export async function PATCH(
         delete data.password
 
         const user = await User.findByIdAndUpdate(
-            params.id,
+            await params.id,
             { $set: data },
             { new: true, runValidators: true }
         ).select('-password')

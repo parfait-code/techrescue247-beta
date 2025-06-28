@@ -21,17 +21,57 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Ticket, Plus, Search, Filter } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Separator } from "@/components/ui/separator";
+import {
+  Ticket,
+  Plus,
+  Search,
+  Filter,
+  Calendar,
+  Phone,
+  User,
+  Eye,
+  ExternalLink,
+  Image as ImageIcon,
+} from "lucide-react";
 import { formatDate, getStatusColor, getPriorityColor } from "@/lib/utils";
-import { useAppDispatch, useTickets } from "@/store/hooks";
+import { useAppDispatch, useTickets, useAuth } from "@/store/hooks";
 import { fetchTickets } from "@/store/slices/ticketSlice";
+
+interface TicketDetails {
+  _id: string;
+  title: string;
+  description: string;
+  status: string;
+  priority: string;
+  phone: string;
+  createdAt: string;
+  updatedAt?: string;
+  screenshots?: string[];
+  userId?: {
+    name: string;
+    email: string;
+  };
+}
 
 export default function TicketsPage() {
   const dispatch = useAppDispatch();
   const { tickets, isLoading } = useTickets();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const [selectedTicket, setSelectedTicket] = useState<TicketDetails | null>(
+    null
+  );
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchTickets());
@@ -78,6 +118,11 @@ export default function TicketsPage() {
       default:
         return priority;
     }
+  };
+
+  const openDetailsDialog = (ticket: any) => {
+    setSelectedTicket(ticket);
+    setDetailsDialogOpen(true);
   };
 
   if (isLoading) {
@@ -211,11 +256,14 @@ export default function TicketsPage() {
                       </TableCell>
                       <TableCell>{formatDate(ticket.createdAt)}</TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/dashboard/tickets/${ticket._id}`}>
-                          <Button variant="ghost" size="sm">
-                            Voir détails
-                          </Button>
-                        </Link>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openDetailsDialog(ticket)}
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Voir détails
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -253,6 +301,136 @@ export default function TicketsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Dialog pour afficher les détails du ticket */}
+      <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Détails du ticket</DialogTitle>
+            <DialogDescription>
+              Ticket #{selectedTicket?._id.slice(-6)}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedTicket && (
+            <div className="space-y-4">
+              {/* Informations principales */}
+              <div>
+                <h3 className="font-semibold text-lg mb-2">
+                  {selectedTicket.title}
+                </h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge
+                    variant="secondary"
+                    className={getPriorityColor(selectedTicket.priority)}
+                  >
+                    {getPriorityText(selectedTicket.priority)}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className={getStatusColor(selectedTicket.status)}
+                  >
+                    {getStatusText(selectedTicket.status)}
+                  </Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Description */}
+              <div>
+                <h4 className="font-medium mb-2">Description</h4>
+                <p className="text-gray-700 whitespace-pre-wrap">
+                  {selectedTicket.description}
+                </p>
+              </div>
+
+              <Separator />
+
+              {/* Informations de contact */}
+              <div>
+                <h4 className="font-medium mb-2">Informations de contact</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">
+                      {user?.name || "Utilisateur"}
+                    </span>
+                  </div>
+                  {selectedTicket.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm">{selectedTicket.phone}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm">
+                      Créé le {formatDate(selectedTicket.createdAt)}
+                    </span>
+                  </div>
+                  {selectedTicket.updatedAt && (
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm">
+                        Mis à jour le {formatDate(selectedTicket.updatedAt)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Captures d'écran */}
+              {selectedTicket.screenshots &&
+                selectedTicket.screenshots.length > 0 && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="font-medium mb-2">
+                        Captures d&apos;écran
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        {selectedTicket.screenshots.map(
+                          (screenshot: string, index: number) => (
+                            <a
+                              key={index}
+                              href={screenshot}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                            >
+                              <img
+                                src={screenshot}
+                                alt={`Capture ${index + 1}`}
+                                className="w-full h-32 object-cover"
+                              />
+                              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity flex items-center justify-center">
+                                <ExternalLink className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
+                            </a>
+                          )
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+
+              {/* Actions */}
+              <Separator />
+              <div className="flex justify-end gap-2">
+                <Link href={`/dashboard/tickets/${selectedTicket._id}`}>
+                  <Button variant="outline">Voir la page complète</Button>
+                </Link>
+                <Button
+                  variant="default"
+                  onClick={() => setDetailsDialogOpen(false)}
+                >
+                  Fermer
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
