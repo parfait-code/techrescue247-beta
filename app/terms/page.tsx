@@ -9,7 +9,9 @@ export default function TermsPage() {
       {/* Hero Section */}
       <section className="bg-primary text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-4">Conditions d'utilisation</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            Conditions d&apos;utilisation
+          </h1>
           <p className="text-blue-100">Dernière mise à jour : 28 Juin 2025</p>
         </div>
       </section>
@@ -23,9 +25,10 @@ export default function TermsPage() {
                 1. Acceptation des conditions
               </h2>
               <p className="mb-6">
-                En utilisant les services de TechRescue247, vous acceptez d'être
-                lié par ces conditions d'utilisation. Si vous n'acceptez pas ces
-                conditions, veuillez ne pas utiliser nos services.
+                En utilisant les services de TechRescue247, vous acceptez
+                d&apos;être lié par ces conditions d&apos;utilisation. Si vous
+                n&apos;acceptez pas ces conditions, veuillez ne pas utiliser nos
+                services.
               </p>
 
               <h2 className="text-2xl font-bold mb-4">
@@ -37,9 +40,9 @@ export default function TermsPage() {
               </p>
               <ul className="list-disc pl-6 mb-6">
                 <li>Support technique HelpDesk 24/7</li>
-                <li>Gestion d'infrastructure IT</li>
+                <li>Gestion d&apos;infrastructure IT</li>
                 <li>Migration cloud</li>
-                <li>Développement d'applications</li>
+                <li>Développement d&apos;applications</li>
                 <li>Services de consultation IT</li>
               </ul>
 
@@ -54,8 +57,8 @@ export default function TermsPage() {
                 <li>Utiliser nos services pour des activités illégales</li>
                 <li>Tenter de compromettre la sécurité de nos systèmes</li>
                 <li>Transmettre des virus ou codes malveillants</li>
-                <li>Usurper l'identité d'une autre personne</li>
-                <li>Harceler ou nuire à d'autres utilisateurs</li>
+                <li>Usurper l&apos;identité d&apos;une autre personne</li>
+                <li>Harceler ou nuire à d&apos;autres utilisateurs</li>
               </ul>
 
               <h2 className="text-2xl font-bold mb-4">4. Compte utilisateur</h2>
@@ -85,12 +88,12 @@ export default function TermsPage() {
                 6. Limitation de responsabilité
               </h2>
               <p className="mb-6">
-                TechRescue247 s'efforce de fournir des services de qualité, mais
-                ne peut garantir :
+                TechRescue247 s&apos;efforce de fournir des services de qualité,
+                mais ne peut garantir :
               </p>
               <ul className="list-disc pl-6 mb-6">
-                <li>L'absence totale d'interruptions de service</li>
-                <li>L'exactitude absolue de toutes les informations</li>
+                <li>L&apos;absence totale d&apos;interruptions de service</li>
+                <li>L&apos;exactitude absolue de toutes les informations</li>
                 <li>La résolution de tous les problèmes techniques</li>
               </ul>
               <p className="mb-6">
@@ -137,8 +140,8 @@ export default function TermsPage() {
 
               <h2 className="text-2xl font-bold mb-4">11. Contact</h2>
               <p className="mb-6">
-                Pour toute question concernant ces conditions d'utilisation,
-                veuillez nous contacter :
+                Pour toute question concernant ces conditions
+                d&apos;utilisation, veuillez nous contacter :
               </p>
               <ul className="list-none mb-6">
                 <li>Email : legal@techrescue247.com</li>

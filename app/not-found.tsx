@@ -25,7 +25,8 @@ export default function NotFound() {
             Page introuvable
           </h1>
           <p className="text-xl text-gray-600 mb-8">
-            Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
+            Désolé, la page que vous recherchez n&apos;existe pas ou a été
+            déplacée.
           </p>
 
           {/* Action Buttons */}
@@ -33,13 +34,13 @@ export default function NotFound() {
             <Link href="/">
               <Button size="lg">
                 <Home className="mr-2" />
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Button>
             </Link>
             <Link href="/helpdesk">
               <Button size="lg" variant="outline">
                 <Search className="mr-2" />
-                Besoin d'aide ?
+                Besoin d&apos;aide ?
               </Button>
             </Link>
           </div>

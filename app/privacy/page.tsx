@@ -33,7 +33,7 @@ export default function PrivacyPage() {
                 2. Informations que nous collectons
               </h2>
               <p className="mb-4">
-                Nous collectons plusieurs types d'informations :
+                Nous collectons plusieurs types d&apos;informations :
               </p>
 
               <h3 className="text-xl font-semibold mb-3">
@@ -43,7 +43,7 @@ export default function PrivacyPage() {
                 <li>Nom et prénom</li>
                 <li>Adresse email</li>
                 <li>Numéro de téléphone</li>
-                <li>Nom de l'entreprise</li>
+                <li>Nom de l&apos;entreprise</li>
                 <li>Adresse de facturation</li>
                 <li>Informations de paiement</li>
               </ul>
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
                 <li>Type de navigateur</li>
                 <li>Pages visitées</li>
                 <li>Durée des visites</li>
-                <li>Informations sur l'appareil</li>
+                <li>Informations sur l&apos;appareil</li>
                 <li>Cookies et technologies similaires</li>
               </ul>
 
@@ -69,7 +69,7 @@ export default function PrivacyPage() {
                 <li>Traiter vos demandes de support</li>
                 <li>Envoyer des communications importantes</li>
                 <li>Personnaliser votre expérience</li>
-                <li>Analyser l'utilisation de nos services</li>
+                <li>Analyser l&apos;utilisation de nos services</li>
                 <li>Prévenir la fraude et assurer la sécurité</li>
                 <li>Respecter nos obligations légales</li>
               </ul>
@@ -138,7 +138,7 @@ export default function PrivacyPage() {
                   <strong>Rectifier</strong> les informations inexactes
                 </li>
                 <li>
-                  <strong>Supprimer</strong> vos données (droit à l'oubli)
+                  <strong>Supprimer</strong> vos données (droit à l&apos;oubli)
                 </li>
                 <li>
                   <strong>Limiter</strong> le traitement de vos données
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
                 </li>
                 <li>
                   <strong>Cookies de performance :</strong> Pour analyser
-                  l'utilisation du site
+                  l&apos;utilisation du site
                 </li>
                 <li>
                   <strong>Cookies de fonctionnalité :</strong> Pour mémoriser
@@ -233,8 +233,8 @@ export default function PrivacyPage() {
                 <p className="text-sm text-blue-800">
                   <strong>Note importante :</strong> En utilisant nos services,
                   vous acceptez cette politique de confidentialité. Si vous
-                  n'êtes pas d'accord avec ces termes, veuillez ne pas utiliser
-                  nos services.
+                  n&apos;êtes pas d&apos;accord avec ces termes, veuillez ne pas
+                  utiliser nos services.
                 </p>
               </div>
             </CardContent>

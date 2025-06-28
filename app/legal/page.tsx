@@ -80,16 +80,16 @@ export default function LegalPage() {
                 4. Propriété intellectuelle
               </h2>
               <p className="mb-6">
-                L'ensemble de ce site relève de la législation camerounaise et
-                internationale sur le droit d'auteur et la propriété
+                L&apos;ensemble de ce site relève de la législation camerounaise
+                et internationale sur le droit d&apos;auteur et la propriété
                 intellectuelle. Tous les droits de reproduction sont réservés, y
                 compris pour les documents téléchargeables et les
                 représentations iconographiques et photographiques.
               </p>
               <p className="mb-6">
                 La reproduction de tout ou partie de ce site sur un support
-                électronique quel qu'il soit est formellement interdite sauf
-                autorisation expresse du directeur de la publication.
+                électronique quel qu&apos;il soit est formellement interdite
+                sauf autorisation expresse du directeur de la publication.
               </p>
 
               <h2 className="text-2xl font-bold mb-4">
@@ -98,8 +98,8 @@ export default function LegalPage() {
               <p className="mb-6">
                 Conformément à la loi n° 2010/012 du 21 décembre 2010 relative à
                 la cybersécurité et la cybercriminalité au Cameroun, vous
-                disposez d'un droit d'accès, de rectification et de suppression
-                des données vous concernant.
+                disposez d&apos;un droit d&apos;accès, de rectification et de
+                suppression des données vous concernant.
               </p>
               <p className="mb-6">
                 Pour exercer ce droit, veuillez nous contacter à :
@@ -108,16 +108,16 @@ export default function LegalPage() {
 
               <h2 className="text-2xl font-bold mb-4">6. Cookies</h2>
               <p className="mb-6">
-                Ce site utilise des cookies pour améliorer l'expérience
+                Ce site utilise des cookies pour améliorer l&apos;expérience
                 utilisateur. En poursuivant votre navigation sur ce site, vous
-                acceptez l'utilisation de cookies conformément à notre politique
-                de confidentialité.
+                acceptez l&apos;utilisation de cookies conformément à notre
+                politique de confidentialité.
               </p>
 
               <h2 className="text-2xl font-bold mb-4">7. Liens hypertextes</h2>
               <p className="mb-6">
                 Les liens hypertextes mis en place dans le cadre du présent site
-                internet en direction d'autres ressources présentes sur le
+                internet en direction d&apos;autres ressources présentes sur le
                 réseau Internet ne sauraient engager la responsabilité de
                 TechRescue247.
               </p>
@@ -125,19 +125,20 @@ export default function LegalPage() {
               <h2 className="text-2xl font-bold mb-4">8. Responsabilité</h2>
               <p className="mb-6">
                 Les informations fournies sur ce site le sont à titre indicatif.
-                TechRescue247 ne saurait garantir l'exactitude, la complétude,
-                l'actualité des informations diffusées sur ce site.
+                TechRescue247 ne saurait garantir l&apos;exactitude, la
+                complétude, l&apos;actualité des informations diffusées sur ce
+                site.
               </p>
               <p className="mb-6">
-                En conséquence, l'utilisateur reconnaît utiliser ces
+                En conséquence, l&apos;utilisateur reconnaît utiliser ces
                 informations sous sa responsabilité exclusive.
               </p>
 
               <h2 className="text-2xl font-bold mb-4">9. Litiges</h2>
               <p className="mb-6">
                 Les présentes conditions sont régies par le droit camerounais.
-                En cas de litige et après l'échec de toute tentative de
-                recherche d'une solution amiable, les tribunaux camerounais
+                En cas de litige et après l&apos;échec de toute tentative de
+                recherche d&apos;une solution amiable, les tribunaux camerounais
                 seront seuls compétents pour connaître de ce litige.
               </p>
 

@@ -94,19 +94,6 @@ export default function StatusPage() {
   const [lastUpdated, setLastUpdated] = useState(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "operational":
-        return "text-green-500";
-      case "degraded":
-        return "text-yellow-500";
-      case "outage":
-        return "text-red-500";
-      default:
-        return "text-gray-500";
-    }
-  };
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "operational":
