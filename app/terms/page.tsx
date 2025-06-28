@@ -144,9 +144,9 @@ export default function TermsPage() {
                 d&apos;utilisation, veuillez nous contacter :
               </p>
               <ul className="list-none mb-6">
-                <li>Email : legal@techrescue247.com</li>
-                <li>Téléphone : +237 123 456 789</li>
-                <li>Adresse : Yaoundé, Centre, Cameroun</li>
+                <li>Email : contact@techrescue247.com</li>
+                <li>Téléphone : +237 658 375 813</li>
+                <li>Adresse : Mimboman Terminus, Yaoundé, Centre, Cameroun</li>
               </ul>
             </CardContent>
           </Card>

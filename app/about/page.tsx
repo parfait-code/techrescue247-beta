@@ -45,50 +45,50 @@ const values = [
   },
 ];
 
-const milestones = [
-  {
-    year: "2010",
-    title: "Création de l'entreprise",
-    description: "Début de notre aventure avec une équipe de 3 personnes",
-  },
-  {
-    year: "2015",
-    title: "Expansion régionale",
-    description: "Ouverture de bureaux dans 5 villes du Cameroun",
-  },
-  {
-    year: "2020",
-    title: "10 000 clients",
-    description: "Franchissement du cap des 10 000 entreprises clientes",
-  },
-  {
-    year: "2025",
-    title: "Leader du marché",
-    description: "Reconnu comme le leader du support IT au Cameroun",
-  },
-];
+// const milestones = [
+//   {
+//     year: "2010",
+//     title: "Création de l'entreprise",
+//     description: "Début de notre aventure avec une équipe de 3 personnes",
+//   },
+//   {
+//     year: "2015",
+//     title: "Expansion régionale",
+//     description: "Ouverture de bureaux dans 5 villes du Cameroun",
+//   },
+//   {
+//     year: "2020",
+//     title: "10 000 clients",
+//     description: "Franchissement du cap des 10 000 entreprises clientes",
+//   },
+//   {
+//     year: "2025",
+//     title: "Leader du marché",
+//     description: "Reconnu comme le leader du support IT au Cameroun",
+//   },
+// ];
 
 const team = [
   {
-    name: "Jean-Paul Mbarga",
-    role: "CEO & Fondateur",
-    description: "20 ans d'expérience dans l'IT",
-  },
-  {
-    name: "Marie Ngono",
-    role: "Directrice Technique",
+    name: "Emmanuel Ando",
+    role: "Co-Fondateur",
     description: "Expert en infrastructure réseau",
   },
   {
-    name: "Pierre Kamga",
-    role: "Directeur Commercial",
-    description: "Spécialiste en relations clients",
+    name: "Parfait Kouam",
+    role: "Co-Fondateur",
+    description: "Expert en Développement logiciel",
   },
-  {
-    name: "Fatima Diallo",
-    role: "Responsable Support",
-    description: "15 ans dans le support technique",
-  },
+  //   {
+  //     name: "Pierre Kamga",
+  //     role: "Directeur Commercial",
+  //     description: "Spécialiste en relations clients",
+  //   },
+  //   {
+  //     name: "Fatima Diallo",
+  //     role: "Responsable Support",
+  //     description: "15 ans dans le support technique",
+  //   },
 ];
 
 export default function AboutPage() {
@@ -104,8 +104,10 @@ export default function AboutPage() {
               À propos de TechRescue247
             </h1>
             <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-              Votre partenaire de confiance pour tous vos besoins en support IT
-              depuis plus de 15 ans
+              Depuis 2024, nous accompagnons les entreprises dans leur évolution
+              technologique. Notre expertise couvre tous les besoins en
+              infrastructures informatiques, de la conception à la maintenance
+              et à la sécurité.
             </p>
           </div>
         </div>
@@ -118,23 +120,23 @@ export default function AboutPage() {
             <div>
               <Badge className="mb-4">Notre histoire</Badge>
               <h2 className="text-3xl font-bold mb-6">
-                Simplifier l&apos;IT pour les entreprises africaines
+                Une vision technologique au service des entreprises
               </h2>
               <p className="text-gray-600 mb-4">
-                Fondée en 2010, TechRescue247 est née de la volonté de fournir
-                un support IT de qualité internationale aux entreprises
-                camerounaises et africaines.
+                Fondée en 2024 par une équipe d&apos;ingénieurs passionnés,
+                notre entreprise a débuté avec une vision claire : démocratiser
+                l&apos;accès aux technologies d&apos;infrastructure avancées
+                pour toutes les entreprises.
               </p>
               <p className="text-gray-600 mb-4">
-                Nous avons commencé avec une petite équipe de 3 personnes
-                passionnées par la technologie. Aujourd&apos;hui, nous sommes
-                fiers d&apos;être une équipe de plus de 50 experts certifiés,
-                servant plus de 10 000 entreprises à travers le Cameroun.
+                Au fil du temps, nous avons développé une expertise reconnue en
+                modernisation des systèmes d&apos;information, accompagnant de
+                nombreuses entreprises dans leur transformation numérique.
               </p>
-              <p className="text-gray-600">
-                Notre mission est simple : permettre aux entreprises de se
-                concentrer sur leur cœur de métier pendant que nous gérons leurs
-                défis technologiques.
+              <p className="text-gray-600 mb-4">
+                Aujourd&apos;hui, notre équipe d&apos;experts continue
+                d&apos;innover pour proposer des solutions sur mesure alliant
+                performance, sécurité et durabilité.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-6">
@@ -194,7 +196,7 @@ export default function AboutPage() {
       </section>
 
       {/* Milestones */}
-      <section className="py-20">
+      {/* <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Notre parcours</h2>
@@ -229,7 +231,7 @@ export default function AboutPage() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Team */}
       <section className="py-20 bg-gray-50">
@@ -271,10 +273,10 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4">
                 {[
-                  "Plus de 15 ans d'expérience dans le support IT",
-                  "Équipe de 50+ experts certifiés",
+                  //   "Plus de 15 ans d'expérience dans le support IT",
+                  "Équipe de 10+ experts certifiés",
                   "Support disponible 24/7 en français et anglais",
-                  "10 000+ entreprises satisfaites",
+                  "100+ clients satisfaites",
                   "Temps de réponse garanti < 2 heures",
                   "Infrastructure locale pour une meilleure réactivité",
                 ].map((item, index) => (
@@ -286,21 +288,21 @@ export default function AboutPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-6">
-              <Card className="text-center">
+              {/* <Card className="text-center">
                 <CardHeader>
                   <div className="text-3xl font-bold text-primary">15+</div>
                   <CardDescription>Années d&apos;expérience</CardDescription>
                 </CardHeader>
-              </Card>
+              </Card> */}
               <Card className="text-center">
                 <CardHeader>
-                  <div className="text-3xl font-bold text-primary">50+</div>
+                  <div className="text-3xl font-bold text-primary">10+</div>
                   <CardDescription>Experts certifiés</CardDescription>
                 </CardHeader>
               </Card>
               <Card className="text-center">
                 <CardHeader>
-                  <div className="text-3xl font-bold text-primary">10k+</div>
+                  <div className="text-3xl font-bold text-primary">100+</div>
                   <CardDescription>Clients satisfaits</CardDescription>
                 </CardHeader>
               </Card>

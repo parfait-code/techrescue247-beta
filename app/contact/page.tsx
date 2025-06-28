@@ -35,8 +35,8 @@ const contactInfo = [
   {
     icon: Phone,
     title: "Téléphone",
-    content: "+237 123 456 789",
-    action: "tel:+237123456789",
+    content: "+237 678 830 036",
+    action: "tel:+237678830036",
   },
   {
     icon: Mail,

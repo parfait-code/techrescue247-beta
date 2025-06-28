@@ -188,7 +188,7 @@ export default function HelpDeskPage() {
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 max-w-4xl mx-auto">
               <div>
-                <div className="text-3xl font-bold">10k+</div>
+                <div className="text-3xl font-bold">1k+</div>
                 <div className="text-blue-200">Tickets résolus</div>
               </div>
               <div>
@@ -246,7 +246,7 @@ export default function HelpDeskPage() {
       </section>
 
       {/* Support Plans */}
-      <section className="py-20 bg-gray-50">
+      {/* <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4">
@@ -303,7 +303,7 @@ export default function HelpDeskPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* How it works */}
       <section className="py-20">
@@ -383,7 +383,7 @@ export default function HelpDeskPage() {
             Prêt à améliorer votre support IT ?
           </h2>
           <p className="text-xl mb-8 text-blue-100">
-            Rejoignez plus de 10 000 entreprises qui nous font confiance
+            Rejoignez plus de 100 entreprises qui nous font confiance
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             {isAuthenticated ? (

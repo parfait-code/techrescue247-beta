@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 
 const stats = [
-  { value: "10k+", label: "Clients satisfaits" },
+  { value: "100+", label: "Clients satisfaits" },
   { value: "99.9%", label: "Disponibilité" },
   { value: "24/7", label: "Support continu" },
   { value: "< 2h", label: "Temps de réponse" },
@@ -257,7 +257,7 @@ export default function HomePage() {
               Ce que disent nos clients
             </h2>
             <p className="text-xl text-gray-600">
-              Plus de 10 000 entreprises nous font confiance
+              Plus de 100 entreprises nous font confiance
             </p>
           </div>
 
@@ -310,7 +310,7 @@ export default function HomePage() {
                     icon: Award,
                     title: "Expertise reconnue",
                     description:
-                      "Plus de 15 ans d'expérience dans le support IT",
+                      "Plus de 1 ans d'expérience dans le Reseau Informatique",
                   },
                   {
                     icon: Zap,
