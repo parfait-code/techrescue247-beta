@@ -1,303 +1,423 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-  Phone,
-  Mail,
-  MapPin,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
+import { useAuth } from "@/store/hooks";
+import {
   Headphones,
   Shield,
   Clock,
-  Menu,
-  X,
+  Users,
+  CheckCircle,
+  ArrowRight,
+  Star,
+  TrendingUp,
+  Zap,
+  Award,
+  Network,
+  Cloud,
+  Server,
+  Code,
+  Phone,
+  MessageCircle,
+  Sparkles,
   User,
-  Settings,
 } from "lucide-react";
-import { useAuth } from "@/store/hooks";
+
+const stats = [
+  { value: "10k+", label: "Clients satisfaits" },
+  { value: "99.9%", label: "Disponibilité" },
+  { value: "24/7", label: "Support continu" },
+  { value: "< 2h", label: "Temps de réponse" },
+];
+
+const testimonials = [
+  {
+    name: "Sophie Martin",
+    role: "Directrice IT, TechCorp",
+    content:
+      "TechRescue247 a transformé notre infrastructure IT. Leur réactivité et expertise sont exceptionnelles.",
+    rating: 5,
+  },
+  {
+    name: "Jean Dupont",
+    role: "CEO, StartupPlus",
+    content:
+      "Le service HelpDesk est incroyable. Nos problèmes sont résolus rapidement et efficacement.",
+    rating: 5,
+  },
+  {
+    name: "Marie Laurent",
+    role: "Manager, FinanceGroup",
+    content:
+      "La migration cloud s'est déroulée sans accroc grâce à leur équipe professionnelle.",
+    rating: 5,
+  },
+];
+
+const services = [
+  {
+    icon: Network,
+    title: "Infrastructure Réseau",
+    description:
+      "Conception et sécurisation de vos réseaux pour une connectivité optimale.",
+    href: "/services/infrastructure-reseau",
+  },
+  {
+    icon: Cloud,
+    title: "Migration Cloud",
+    description:
+      "Migrez vers le cloud en toute sécurité sans interruption de service.",
+    href: "/services/migration-cloud",
+  },
+  {
+    icon: Server,
+    title: "Gestion d'Infrastructure",
+    description:
+      "Optimisation et supervision 24/7 de vos systèmes informatiques.",
+    href: "/services/gestion-infrastructure",
+  },
+  {
+    icon: Code,
+    title: "Développement d'Applications",
+    description:
+      "Solutions sur mesure adaptées à vos besoins métiers spécifiques.",
+    href: "/services/developpement-applications",
+  },
+];
 
 export default function HomePage() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isAuthenticated, user } = useAuth();
-
-  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50 border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center flex-shrink-0">
-              <Link href="/" className="flex items-center">
-                <h1 className="text-xl sm:text-2xl font-bold text-primary truncate">
-                  Techrescue247
-                </h1>
-              </Link>
-            </div>
+      <Navbar />
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
+      {/* Hero Section avec HelpDesk */}
+      <section className="relative bg-gradient-to-br from-blue-600 via-primary to-blue-700 text-white overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+          <div className="text-center">
+            <Badge variant="secondary" className="mb-4 px-4 py-1">
+              <Sparkles className="w-4 h-4 mr-1" />
+              Support IT Premium 24/7
+            </Badge>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
+              HelpDesk Professionnel
+              <br />
+              <span className="text-blue-200">pour votre entreprise</span>
+            </h1>
+            <p className="text-xl sm:text-2xl mb-8 max-w-3xl mx-auto text-blue-100">
+              Résolvez tous vos problèmes IT instantanément avec notre équipe
+              d`&apos;experts disponibles 24/7
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               {isAuthenticated ? (
-                // Menu utilisateur connecté
-                <>
-                  {/* User Icon Button */}
-                  <Link href="/dashboard">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="p-2 hover:bg-gray-100 border border-gray-200 rounded-full"
-                      title={`Dashboard - ${user?.name}`}
-                    >
-                      <User className="w-5 h-5" />
-                      <span className="text-sm text-gray-600 hidden lg:block">
-                        Bonjour, {user?.name}
-                      </span>
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard/tickets/new">
-                    <Button size="sm">Nouveau ticket</Button>
-                  </Link>
-                </>
+                <Link href="/dashboard/tickets/new">
+                  <Button
+                    size="lg"
+                    variant="secondary"
+                    className="text-lg px-8"
+                  >
+                    <Headphones className="mr-2" />
+                    Créer un ticket maintenant
+                  </Button>
+                </Link>
               ) : (
-                // Menu utilisateur non connecté
                 <>
-                  <Link href="/login">
-                    <Button variant="outline" size="sm">
-                      Connexion
+                  <Link href="/register">
+                    <Button
+                      size="lg"
+                      variant="secondary"
+                      className="text-lg px-8"
+                    >
+                      Commencer gratuitement
                     </Button>
                   </Link>
-                  <Link href="/register">
-                    <Button size="sm">Créer un compte</Button>
+                  <Link href="/helpdesk">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="text-lg px-8 bg-white/10 text-white border-white hover:bg-white hover:text-primary"
+                    >
+                      En savoir plus
+                    </Button>
                   </Link>
                 </>
               )}
             </div>
 
-            {/* Mobile menu button */}
-            <div className="md:hidden flex items-center space-x-2">
-              {/* User Icon for mobile when authenticated */}
-              {isAuthenticated && (
-                <Link href="/dashboard">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="p-2 hover:bg-gray-100 border border-gray-200 rounded-full"
-                    title={`Dashboard - ${user?.name}`}
-                  >
-                    <User className="w-4 h-4" />
+            {/* Features rapides */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+              <div className="flex items-center justify-center space-x-2">
+                <Clock className="w-6 h-6 text-blue-200" />
+                <span className="text-lg">Réponse {`<`} 2h</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <Shield className="w-6 h-6 text-blue-200" />
+                <span className="text-lg">100% Sécurisé</span>
+              </div>
+              <div className="flex items-center justify-center space-x-2">
+                <Users className="w-6 h-6 text-blue-200" />
+                <span className="text-lg">Experts certifiés</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+                  {stat.value}
+                </div>
+                <div className="text-gray-600">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Nos Services IT Complets
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Au-delà du HelpDesk, découvrez notre gamme complète de services
+              pour transformer votre infrastructure
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service, index) => {
+              const Icon = service.icon;
+              return (
+                <Card
+                  key={index}
+                  className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                >
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">{service.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="mb-4">
+                      {service.description}
+                    </CardDescription>
+                    <Link href={service.href}>
+                      <Button
+                        variant="ghost"
+                        className="p-0 h-auto font-medium"
+                      >
+                        En savoir plus
+                        <ArrowRight className="ml-1 w-4 h-4" />
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          <div className="text-center mt-12">
+            <Link href="/services">
+              <Button size="lg" variant="outline">
+                Voir tous nos services
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+              Ce que disent nos clients
+            </h2>
+            <p className="text-xl text-gray-600">
+              Plus de 10 000 entreprises nous font confiance
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                      />
+                    ))}
+                  </div>
+                  <CardDescription className="text-base text-gray-700">
+                    &quot;{testimonial.content}&quot;
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
+                      <User className="w-6 h-6 text-gray-600" />
+                    </div>
+                    <div>
+                      <p className="font-semibold">{testimonial.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {testimonial.role}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+                Pourquoi choisir TechRescue247 ?
+              </h2>
+              <div className="space-y-4">
+                {[
+                  {
+                    icon: Award,
+                    title: "Expertise reconnue",
+                    description:
+                      "Plus de 15 ans d'expérience dans le support IT",
+                  },
+                  {
+                    icon: Zap,
+                    title: "Réactivité maximale",
+                    description: "Intervention en moins de 2 heures garantie",
+                  },
+                  {
+                    icon: Shield,
+                    title: "Sécurité renforcée",
+                    description: "Protocoles de sécurité aux normes ISO",
+                  },
+                  {
+                    icon: TrendingUp,
+                    title: "Évolutivité",
+                    description:
+                      "Solutions qui grandissent avec votre entreprise",
+                  },
+                ].map((item, index) => {
+                  const Icon = item.icon;
+                  return (
+                    <div key={index} className="flex items-start space-x-4">
+                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-6 h-6 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg mb-1">
+                          {item.title}
+                        </h3>
+                        <p className="text-gray-600">{item.description}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="bg-gray-100 rounded-2xl p-8 lg:p-12">
+              <h3 className="text-2xl font-bold mb-6">
+                Prêt à optimiser votre IT ?
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Rejoignez les milliers d`&apos;entreprises qui nous font
+                confiance pour leur infrastructure informatique.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Support technique 24/7",
+                  "Équipe d'experts certifiés",
+                  "Tarifs transparents",
+                  "Satisfaction garantie",
+                ].map((item, index) => (
+                  <li key={index} className="flex items-center">
+                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              {isAuthenticated ? (
+                <Link href="/dashboard/tickets/new">
+                  <Button size="lg" className="w-full">
+                    Créer mon premier ticket
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/register">
+                  <Button size="lg" className="w-full">
+                    Démarrer gratuitement
                   </Button>
                 </Link>
               )}
+            </div>
+          </div>
+        </div>
+      </section>
 
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-                aria-label="Toggle menu"
+      {/* CTA Section */}
+      <section className="py-20 bg-primary text-white">
+        <div className="max-w-4xl mx-auto text-center px-4">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            Besoin d`&apos;aide immédiate ?
+          </h2>
+          <p className="text-xl mb-8 text-blue-100">
+            Notre équipe d`&apos;experts est disponible 24/7 pour résoudre vos
+            problèmes IT
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/contact">
+              <Button size="lg" variant="secondary">
+                <Phone className="mr-2" />
+                Nous contacter
+              </Button>
+            </Link>
+            <Link href="/helpdesk">
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-white/10 text-white border-white hover:bg-white hover:text-primary"
               >
-                {isMobileMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Navigation Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t bg-white shadow-lg">
-              <div className="px-2 pt-2 pb-3 space-y-1">
-                {isAuthenticated ? (
-                  // Menu mobile utilisateur connecté
-                  <>
-                    <div className="px-3 py-2 border-b border-gray-100">
-                      <p className="text-sm text-gray-600">
-                        Connecté en tant que
-                      </p>
-                      <p className="font-medium text-gray-900 truncate">
-                        {user?.name}
-                      </p>
-                    </div>
-
-                    <Link href="/dashboard" onClick={closeMobileMenu}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-left"
-                      >
-                        <User className="w-4 h-4 mr-3" />
-                        Dashboard
-                      </Button>
-                    </Link>
-
-                    <Link href="/dashboard/tickets" onClick={closeMobileMenu}>
-                      <Button
-                        variant="ghost"
-                        className="w-full justify-start text-left"
-                      >
-                        <Settings className="w-4 h-4 mr-3" />
-                        Mes tickets
-                      </Button>
-                    </Link>
-
-                    <Link
-                      href="/dashboard/tickets/new"
-                      onClick={closeMobileMenu}
-                    >
-                      <Button className="w-full mt-2">Créer un ticket</Button>
-                    </Link>
-                  </>
-                ) : (
-                  // Menu mobile utilisateur non connecté
-                  <>
-                    <Link href="/login" onClick={closeMobileMenu}>
-                      <Button variant="outline" className="w-full mb-2">
-                        Connexion
-                      </Button>
-                    </Link>
-
-                    <Link href="/register" onClick={closeMobileMenu}>
-                      <Button className="w-full">Créer un compte</Button>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-
-      {/* Overlay pour fermer le menu mobile */}
-      {isMobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-25 z-40 md:hidden"
-          onClick={closeMobileMenu}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-primary to-blue-700 text-white py-16 sm:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-              Support IT Professionnel 24/7
-            </h2>
-            <p className="text-lg sm:text-xl mb-6 sm:mb-8 max-w-2xl mx-auto">
-              Résolvons ensemble vos problèmes informatiques
-            </p>
-            {isAuthenticated ? (
-              <Link href="/dashboard/tickets/new">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-base sm:text-lg"
-                >
-                  Créer un ticket maintenant
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/register">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="text-base sm:text-lg"
-                >
-                  Commencer maintenant
-                </Button>
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
-            Pourquoi nous choisir?
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            <div className="text-center p-4">
-              <Headphones className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-primary" />
-              <h4 className="text-lg sm:text-xl font-semibold mb-2">
-                Support Expert
-              </h4>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Équipe de techniciens qualifiés prêts à vous aider
-              </p>
-            </div>
-            <div className="text-center p-4">
-              <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-primary" />
-              <h4 className="text-lg sm:text-xl font-semibold mb-2">
-                Réponse Rapide
-              </h4>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Prise en charge de vos demandes en moins de 24h
-              </p>
-            </div>
-            <div className="text-center p-4">
-              <Shield className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-primary" />
-              <h4 className="text-lg sm:text-xl font-semibold mb-2">
-                Sécurité Garantie
-              </h4>
-              <p className="text-gray-600 text-sm sm:text-base">
-                Vos données sont protégées et sécurisées
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Info */}
-      <section className="bg-gray-50 py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">
-            Contactez-nous
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            <div className="flex items-start sm:items-center justify-center text-center sm:text-left">
-              <Phone className="w-5 h-5 sm:w-6 sm:h-6 mr-3 text-primary flex-shrink-0 mt-1 sm:mt-0" />
-              <div>
-                <p className="font-semibold text-sm sm:text-base">Téléphone</p>
-                <p className="text-gray-600 text-sm">+237 678 830 036</p>
-                <p className="text-gray-600 text-sm">+237 650 601 520</p>
-              </div>
-            </div>
-            <div className="flex items-start sm:items-center justify-center text-center sm:text-left">
-              <Mail className="w-5 h-5 sm:w-6 sm:h-6 mr-3 text-primary flex-shrink-0 mt-1 sm:mt-0" />
-              <div>
-                <p className="font-semibold text-sm sm:text-base">Email</p>
-                <p className="text-gray-600 text-sm">
-                  contact@techrescue247.com
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start sm:items-center justify-center text-center sm:text-left sm:col-span-2 lg:col-span-1">
-              <MapPin className="w-5 h-5 sm:w-6 sm:h-6 mr-3 text-primary flex-shrink-0 mt-1 sm:mt-0" />
-              <div>
-                <p className="font-semibold text-sm sm:text-base">Bureau</p>
-                <p className="text-gray-600 text-sm">Terminus Mimboman</p>
-                <p className="text-gray-600 text-sm">Yaoundé - Cameroun</p>
-              </div>
-            </div>
+                <MessageCircle className="mr-2" />
+                Chat en direct
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-sm sm:text-base">
-              &copy; 2024 Techrescue247. Tous droits réservés.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

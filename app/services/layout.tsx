@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Navbar, Footer } from "@/components/layout";
 
 export const metadata: Metadata = {
   title: {
@@ -14,5 +15,11 @@ export default function ServicesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      <main>{children}</main>
+      <Footer />
+    </>
+  );
 }
