@@ -59,42 +59,42 @@ const helpdeskFeatures = [
   },
 ];
 
-const supportTypes = [
-  {
-    title: "Support Niveau 1",
-    description: "Assistance de base",
-    features: [
-      "Résolution des problèmes courants",
-      "Support par email",
-      "Temps de réponse < 24h",
-      "Base de connaissances",
-    ],
-    price: "À partir de 50€/mois",
-  },
-  {
-    title: "Support Niveau 2",
-    description: "Assistance avancée",
-    features: [
-      "Support téléphonique inclus",
-      "Temps de réponse < 4h",
-      "Assistance à distance",
-      "Priority support",
-    ],
-    price: "À partir de 150€/mois",
-    popular: true,
-  },
-  {
-    title: "Support Niveau 3",
-    description: "Assistance premium",
-    features: [
-      "Support dédié 24/7",
-      "Temps de réponse < 1h",
-      "Technicien dédié",
-      "Rapports mensuels",
-    ],
-    price: "Sur devis",
-  },
-];
+// const supportTypes = [
+//   {
+//     title: "Support Niveau 1",
+//     description: "Assistance de base",
+//     features: [
+//       "Résolution des problèmes courants",
+//       "Support par email",
+//       "Temps de réponse < 24h",
+//       "Base de connaissances",
+//     ],
+//     price: "À partir de 50€/mois",
+//   },
+//   {
+//     title: "Support Niveau 2",
+//     description: "Assistance avancée",
+//     features: [
+//       "Support téléphonique inclus",
+//       "Temps de réponse < 4h",
+//       "Assistance à distance",
+//       "Priority support",
+//     ],
+//     price: "À partir de 150€/mois",
+//     popular: true,
+//   },
+//   {
+//     title: "Support Niveau 3",
+//     description: "Assistance premium",
+//     features: [
+//       "Support dédié 24/7",
+//       "Temps de réponse < 1h",
+//       "Technicien dédié",
+//       "Rapports mensuels",
+//     ],
+//     price: "Sur devis",
+//   },
+// ];
 
 const faqs = [
   {

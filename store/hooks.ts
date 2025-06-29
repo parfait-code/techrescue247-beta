@@ -19,3 +19,8 @@ export const useUsers = () => {
 export const useTickets = () => {
     return useAppSelector((state) => state.ticket);
 };
+
+// Hook pour accéder aux messages
+export const useMessages = () => {
+    return useAppSelector((state) => state.message);
+};
