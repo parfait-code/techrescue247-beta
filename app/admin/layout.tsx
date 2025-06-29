@@ -80,6 +80,15 @@ export default function AdminLayout({
                 Utilisateurs
               </Button>
             </Link>
+            <Link
+              href="/admin/messages"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <Button variant="ghost" className="w-full justify-start">
+                <Users className="w-4 h-4 mr-2" />
+                Messages
+              </Button>
+            </Link>
           </nav>
         </aside>
 

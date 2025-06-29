@@ -17,6 +17,12 @@ const config: Config = {
             },
         },
         extend: {
+            fontFamily: {
+                // Remplacer la police sans-serif par défaut par Inter
+                'sans': ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                // Ou créer une classe spécifique
+                'inter': ['Inter', 'sans-serif'],
+            },
             colors: {
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",

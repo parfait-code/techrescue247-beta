@@ -9,16 +9,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Ticket, Users, Clock, CheckCircle, AlertCircle } from "lucide-react";
+import {
+  Ticket,
+  Users,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  MessageSquare,
+} from "lucide-react";
 import { formatDate, getStatusColor, getPriorityColor } from "@/lib/utils";
-import { useAppDispatch, useTickets, useUsers } from "@/store/hooks";
+import {
+  useAppDispatch,
+  useTickets,
+  useUsers,
+  useMessages,
+} from "@/store/hooks";
 import { fetchTickets } from "@/store/slices/ticketSlice";
 import { fetchUsers } from "@/store/slices/userSlice";
+import { fetchMessages } from "@/store/slices/messageSlice";
+import { Badge } from "@/components/ui/badge";
 
 export default function AdminDashboardPage() {
   const dispatch = useAppDispatch();
   const { tickets, stats, isLoading: ticketsLoading } = useTickets();
   const { users, isLoading: usersLoading } = useUsers();
+  const {
+    messages,
+    stats: messageStats,
+    isLoading: messagesLoading,
+  } = useMessages();
+  dispatch(fetchMessages());
 
   useEffect(() => {
     // Charger les données nécessaires
@@ -109,6 +129,20 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">Comptes actifs</p>
           </CardContent>
         </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Nouveaux Messages
+            </CardTitle>
+            <MessageSquare className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{messageStats.newMessages}</div>
+            <p className="text-xs text-muted-foreground">
+              {messageStats.totalMessages} messages au total
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Recent Tickets */}
@@ -168,6 +202,52 @@ export default function AdminDashboardPage() {
                 </Link>
               ))}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Messages récents */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Messages récents</CardTitle>
+          <Link href="/admin/messages">
+            <button className="text-sm text-primary hover:underline">
+              Voir tous les messages →
+            </button>
+          </Link>
+        </CardHeader>
+        <CardContent>
+          {messages.slice(0, 5).map((message) => (
+            <div key={message._id} className="mb-4 last:mb-0">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-medium">{message.name}</h4>
+                    <Badge
+                      variant="outline"
+                      className={
+                        message.status === "new"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-gray-100 text-gray-700"
+                      }
+                    >
+                      {message.status === "new" ? "Nouveau" : "Lu"}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-gray-600 line-clamp-1">
+                    {message.subject}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {formatDate(message.createdAt)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+          {messages.length === 0 && (
+            <p className="text-gray-500 text-center py-4">
+              Aucun message pour le moment
+            </p>
           )}
         </CardContent>
       </Card>

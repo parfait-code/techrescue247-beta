@@ -14,7 +14,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { useAuth } from "@/store/hooks";
 import {
-  Headphones,
+  // Headphones,
   Shield,
   Clock,
   Users,
@@ -122,36 +122,38 @@ export default function HomePage() {
               d`&apos;experts disponibles 24/7
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {isAuthenticated ? (
-                <Link href="/dashboard/tickets/new">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="text-lg px-8"
-                  >
-                    <Headphones className="mr-2" />
-                    Créer un ticket maintenant
-                  </Button>
-                </Link>
-              ) : (
                 <>
-                  <Link href="/register">
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      className="text-lg px-8"
-                    >
-                      Commencer gratuitement
+                  <Link href="/dashboard/tickets/new">
+                    <Button size="lg" className="text-base sm:text-lg">
+                      Créer un ticket
                     </Button>
                   </Link>
-                  <Link href="/helpdesk">
+                  <Link href="/contact">
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-lg px-8 bg-white/10 text-white border-white hover:bg-white hover:text-primary"
+                      className="text-base sm:text-lg"
                     >
-                      En savoir plus
+                      Nous contacter
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/register">
+                    <Button size="lg" className="text-base sm:text-lg">
+                      Commencer maintenant
+                    </Button>
+                  </Link>
+                  <Link href="/contact">
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="text-base sm:text-lg"
+                    >
+                      Nous contacter
                     </Button>
                   </Link>
                 </>
