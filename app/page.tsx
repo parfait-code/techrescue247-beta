@@ -159,7 +159,6 @@ export default function HomePage() {
                 </>
               )}
             </div>
-
             {/* Features rapides */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
               <div className="flex items-center justify-center space-x-2">
