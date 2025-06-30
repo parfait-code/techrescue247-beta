@@ -38,27 +38,34 @@ export default function AdminDashboardPage() {
     stats: messageStats,
     isLoading: messagesLoading,
   } = useMessages();
-  dispatch(fetchMessages());
+
+  // SUPPRIMEZ cette ligne qui cause la boucle infinie :
+  // dispatch(fetchMessages());
 
   useEffect(() => {
     // Charger les données nécessaires
     dispatch(fetchTickets());
     dispatch(fetchUsers());
+    dispatch(fetchMessages()); // AJOUTEZ cette ligne ICI dans le useEffect
   }, [dispatch]);
 
   // Récupérer les tickets récents (5 derniers)
   const recentTickets = tickets.slice(0, 5);
 
-  const isLoading = ticketsLoading || usersLoading;
+  const isLoading = ticketsLoading || usersLoading || messagesLoading;
 
-  if (isLoading && tickets.length === 0 && users.length === 0) {
+  if (
+    isLoading &&
+    tickets.length === 0 &&
+    users.length === 0 &&
+    messages.length === 0
+  ) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
-
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">

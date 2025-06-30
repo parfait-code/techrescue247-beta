@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { AuthGuard } from "@/components/auth/AuthGuard";
 import { useAuth } from "@/store/hooks";
 import {
   Home,
@@ -61,7 +60,7 @@ export default function AdminLayout({
   const isActive = (href: string) => pathname === href;
 
   return (
-    <AuthGuard requireAdmin>
+    <>
       <div className="min-h-screen bg-gray-100">
         {/* Header Mobile */}
         <div className="lg:hidden bg-white shadow-sm">
@@ -122,20 +121,18 @@ export default function AdminLayout({
                 <LogOut className="w-4 h-4 mr-2" />
                 Déconnexion
               </Button>
-            </Link>
-            <Link href="/admin/users" onClick={() => setIsSidebarOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start">
-                <Users className="w-4 h-4 mr-2" />
-                Utilisateurs
-              </Button>
-            </Link>
-          </nav>
-        </aside>
-
+              <Link href="/admin/users" onClick={() => setSidebarOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start">
+                  <Users className="w-4 h-4 mr-2" />
+                  Utilisateurs
+                </Button>
+              </Link>
+            </div>
+          </aside>
           {/* Main content */}
           <main className="flex-1 p-4 lg:p-8 w-full">{children}</main>
         </div>
       </div>
-    </AuthGuard>
+    </>
   );
 }
