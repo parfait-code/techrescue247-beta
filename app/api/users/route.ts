@@ -1,35 +1,44 @@
-import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import User from '@/models/User'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import {
+    adminDb,
+    verifyFirebaseToken,
+    unauthorizedResponse,
+    forbiddenResponse
+} from '@/lib/firebase-admin';
 
 export async function GET(request: NextRequest) {
     try {
-        const token = getTokenFromRequest(request)
-        if (!token) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+        // Vérifier l'authentification Firebase
+        const user = await verifyFirebaseToken(request);
+        if (!user) {
+            return unauthorizedResponse();
         }
 
-        const payload = verifyToken(token)
-        if (!payload) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+        // Vérifier que l'utilisateur est admin
+        if (user.role !== 'admin') {
+            return forbiddenResponse();
         }
 
-        // Only admins can access this route
-        if (payload.role !== 'admin') {
-            return NextResponse.json({ message: 'Accès refusé' }, { status: 403 })
-        }
+        // Récupérer tous les utilisateurs depuis Firestore
+        const usersSnapshot = await adminDb
+            .collection('users')
+            .orderBy('createdAt', 'desc')
+            .get();
 
-        await dbConnect()
+        const users = usersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            // Ne pas renvoyer les données sensibles
+            password: undefined,
+            mongoId: undefined,
+        }));
 
-        const users = await User.find({}).select('-password').sort('-createdAt')
-
-        return NextResponse.json(users)
+        return NextResponse.json(users);
     } catch (error) {
-        console.error('Get users error:', error)
+        console.error('Get users error:', error);
         return NextResponse.json(
             { message: 'Erreur serveur' },
             { status: 500 }
-        )
+        );
     }
 }

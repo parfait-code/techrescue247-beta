@@ -23,12 +23,8 @@ export function AuthGuard({ children, requireAdmin = false }: AuthGuardProps) {
       }
 
       // Si la route nécessite un admin et que l'utilisateur n'en est pas un
-      if (requireAdmin && user?.role === "user") {
+      if (requireAdmin && user?.role !== "admin") {
         router.push("/dashboard");
-        return;
-      }
-      if (requireAdmin && user?.role === "admin") {
-        router.push("/admin/dashboard");
         return;
       }
     }
@@ -45,11 +41,11 @@ export function AuthGuard({ children, requireAdmin = false }: AuthGuardProps) {
 
   // Ne pas rendre le contenu si non authentifié
   if (!isAuthenticated) {
-    return router.push("/");
+    return null;
   }
 
   // Ne pas rendre le contenu si admin requis mais utilisateur non admin
-  if (user?.role !== "admin") {
+  if (requireAdmin && user?.role !== "admin") {
     return null;
   }
 

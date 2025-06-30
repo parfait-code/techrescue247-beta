@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { useAppDispatch, useAuth } from "@/store/hooks";
+import { register as registerUser, clearError } from "@/store/slices/authSlice";
 
 const registerSchema = z
   .object({
@@ -29,7 +31,8 @@ type RegisterData = z.infer<typeof registerSchema>;
 
 export function RegisterForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isAuthenticated } = useAuth();
 
   const {
     register,
@@ -39,37 +42,38 @@ export function RegisterForm() {
     resolver: zodResolver(registerSchema),
   });
 
+  // Rediriger après inscription réussie
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+  // Afficher les erreurs
+  useEffect(() => {
+    if (error) {
+      toast.error("Erreur d'inscription", {
+        description: error,
+      });
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
+
   const onSubmit = async (data: RegisterData) => {
-    setIsLoading(true);
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      await dispatch(
+        registerUser({
           name: data.name,
           email: data.email,
           phone: data.phone,
           password: data.password,
-        }),
-      });
+        })
+      ).unwrap();
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Erreur lors de l'inscription");
-      }
-
-      toast.success("Compte créé avec succès", {
-        description: "Vous pouvez maintenant vous connecter",
-      });
-
-      router.push("/login");
-    } catch (error: any) {
-      toast.error("Erreur", {
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
+      // La redirection sera gérée par le useEffect
+    } catch (err) {
+      // L'erreur est déjà gérée dans le slice
+      console.error("Registration error:", err);
     }
   };
 
@@ -83,6 +87,8 @@ export function RegisterForm() {
           placeholder="Jean Dupont"
           {...register("name")}
           className="mt-1"
+          disabled={isLoading}
+          autoComplete="name"
         />
         {errors.name && (
           <p className="text-sm text-red-600 mt-1">{errors.name.message}</p>
@@ -97,6 +103,8 @@ export function RegisterForm() {
           placeholder="votre@email.com"
           {...register("email")}
           className="mt-1"
+          disabled={isLoading}
+          autoComplete="email"
         />
         {errors.email && (
           <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
@@ -104,13 +112,15 @@ export function RegisterForm() {
       </div>
 
       <div>
-        <Label htmlFor="phone">Numéro de téléphone</Label>
+        <Label htmlFor="phone">Téléphone</Label>
         <Input
           id="phone"
           type="tel"
-          placeholder="+237 6XX XXX XXX"
+          placeholder="+237 6 XX XX XX XX"
           {...register("phone")}
           className="mt-1"
+          disabled={isLoading}
+          autoComplete="tel"
         />
         {errors.phone && (
           <p className="text-sm text-red-600 mt-1">{errors.phone.message}</p>
@@ -125,6 +135,8 @@ export function RegisterForm() {
           placeholder="••••••••"
           {...register("password")}
           className="mt-1"
+          disabled={isLoading}
+          autoComplete="new-password"
         />
         {errors.password && (
           <p className="text-sm text-red-600 mt-1">{errors.password.message}</p>
@@ -139,6 +151,8 @@ export function RegisterForm() {
           placeholder="••••••••"
           {...register("confirmPassword")}
           className="mt-1"
+          disabled={isLoading}
+          autoComplete="new-password"
         />
         {errors.confirmPassword && (
           <p className="text-sm text-red-600 mt-1">
@@ -148,7 +162,7 @@ export function RegisterForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Création..." : "Créer un compte"}
+        {isLoading ? "Création du compte..." : "Créer un compte"}
       </Button>
     </form>
   );

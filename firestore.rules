@@ -1,0 +1,72 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Fonction pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return request.auth != null && 
+        request.auth.token.role == 'admin';
+    }
+    
+    // Fonction pour vérifier si c'est le propriétaire
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Règles pour la collection users
+    match /users/{userId} {
+      // Lecture : admin ou propriétaire
+      allow read: if isAdmin() || isOwner(userId);
+      
+      // Création : seulement lors de l'inscription (par le système)
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Mise à jour : admin ou propriétaire (mais pas le rôle)
+      allow update: if (isAdmin() || isOwner(userId)) && 
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']) || isAdmin());
+      
+      // Suppression : seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // Règles pour la collection tickets
+    match /tickets/{ticketId} {
+      // Lecture : admin ou propriétaire du ticket
+      allow read: if isAdmin() || 
+        (request.auth != null && resource.data.userId == request.auth.uid);
+      
+      // Création : utilisateurs authentifiés
+      allow create: if request.auth != null && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Mise à jour : admin ou propriétaire (mais certains champs réservés aux admins)
+      allow update: if isAdmin() || 
+        (isOwner(resource.data.userId) && 
+         !request.resource.data.diff(resource.data).affectedKeys()
+           .hasAny(['status', 'priority', 'assignedTo']));
+      
+      // Suppression : seulement admin
+      allow delete: if isAdmin();
+    }
+    
+    // Règles pour la collection messages
+    match /messages/{messageId} {
+      // Lecture : admin ou participant à la conversation
+      allow read: if isAdmin() || 
+        (request.auth != null && 
+         (resource.data.senderId == request.auth.uid || 
+          resource.data.recipientId == request.auth.uid));
+      
+      // Création : utilisateurs authentifiés
+      allow create: if request.auth != null && 
+        request.resource.data.senderId == request.auth.uid;
+      
+      // Mise à jour : seulement l'expéditeur
+      allow update: if request.auth != null && 
+        resource.data.senderId == request.auth.uid;
+      
+      // Suppression : admin ou expéditeur
+      allow delete: if isAdmin() || 
+        (request.auth != null && resource.data.senderId == request.auth.uid);
+    }
+  }
+}
