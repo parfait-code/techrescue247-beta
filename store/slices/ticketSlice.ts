@@ -1,152 +1,145 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ticketsService } from '@/lib/firebase-services';
+import { Ticket } from '@/types/firebase';
 import { toast } from 'sonner';
-
-interface Ticket {
-    _id: string;
-    title: string;
-    description: string;
-    priority: 'low' | 'medium' | 'high' | 'urgent';
-    status: 'open' | 'in-progress' | 'resolved' | 'closed';
-    phone: string;
-    screenshots?: string[];
-    userId: {
-        _id: string;
-        name: string;
-        email: string;
-        phone?: string;
-    };
-    createdAt: string;
-    updatedAt: string;
-}
 
 interface TicketState {
     tickets: Ticket[];
     currentTicket: Ticket | null;
+    isLoading: boolean;
+    error: string | null;
     stats: {
         totalTickets: number;
         openTickets: number;
         inProgressTickets: number;
         resolvedTickets: number;
     };
-    isLoading: boolean;
-    error: string | null;
 }
 
 const initialState: TicketState = {
     tickets: [],
     currentTicket: null,
+    isLoading: false,
+    error: null,
     stats: {
         totalTickets: 0,
         openTickets: 0,
         inProgressTickets: 0,
         resolvedTickets: 0,
     },
-    isLoading: false,
-    error: null,
 };
 
 // Thunk pour récupérer tous les tickets
-export const fetchTickets = createAsyncThunk<Ticket[]>(
+export const fetchTickets = createAsyncThunk<
+    Ticket[],
+    { userId?: string; isAdmin?: boolean } | undefined
+>(
     'tickets/fetchAll',
-    async (_, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
-            const response = await fetch('/api/tickets');
-
-            if (!response.ok) {
-                throw new Error('Erreur lors de la récupération des tickets');
-            }
-
-            const data = await response.json();
-            return data;
+            // Si c'est un utilisateur normal, filtrer par userId
+            const filters = params?.isAdmin ? {} : { userId: params?.userId };
+            const tickets = await ticketsService.getAll(filters);
+            return tickets;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || 'Erreur lors du chargement des tickets');
         }
     }
 );
 
-// Thunk pour récupérer un ticket spécifique
+// Thunk pour récupérer un ticket par ID
 export const fetchTicketById = createAsyncThunk<Ticket, string>(
     'tickets/fetchById',
     async (ticketId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/api/tickets/${ticketId}`);
-
-            if (!response.ok) {
+            const ticket = await ticketsService.getById(ticketId);
+            if (!ticket) {
                 throw new Error('Ticket non trouvé');
             }
-
-            const data = await response.json();
-            return data;
+            return ticket;
         } catch (error: any) {
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || 'Erreur lors du chargement du ticket');
         }
     }
 );
 
-// Thunk pour créer un nouveau ticket
-export const createTicket = createAsyncThunk<Ticket, {
-    title: string;
-    description: string;
-    priority: string;
-    phone: string;
-    screenshots?: string[];
-}>(
+// Thunk pour créer un ticket
+export const createTicket = createAsyncThunk<
+    Ticket,
+    {
+        userId: string;
+        title: string;
+        description: string;
+        priority: 'low' | 'medium' | 'high' | 'urgent';
+        phone: string;
+        screenshots?: string[];
+    }
+>(
     'tickets/create',
-    async (ticketData, { rejectWithValue }) => {
+    async (data, { rejectWithValue }) => {
         try {
-            const response = await fetch('/api/tickets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(ticketData),
+            const ticketId = await ticketsService.create({
+                ...data,
+                status: 'open',
+                screenshots: data.screenshots || [],
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Erreur lors de la création du ticket');
+            // Récupérer le ticket créé avec les infos utilisateur
+            const newTicket = await ticketsService.getById(ticketId);
+            if (!newTicket) {
+                throw new Error('Erreur lors de la création du ticket');
             }
 
-            const data = await response.json();
-            toast.success('Ticket créé avec succès', {
-                description: 'Nous vous contacterons bientôt',
-            });
-            return data;
+            toast.success('Ticket créé avec succès');
+            return newTicket;
         } catch (error: any) {
-            toast.error('Erreur', {
-                description: error.message,
-            });
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || 'Erreur lors de la création du ticket');
         }
     }
 );
 
 // Thunk pour mettre à jour un ticket
-export const updateTicket = createAsyncThunk<Ticket, {
-    id: string;
-    data: Partial<Ticket>;
-}>(
+export const updateTicket = createAsyncThunk<
+    Ticket,
+    {
+        id: string;
+        data: Partial<{
+            title: string;
+            description: string;
+            status: 'open' | 'in-progress' | 'resolved' | 'closed';
+            priority: 'low' | 'medium' | 'high' | 'urgent';
+        }>;
+    }
+>(
     'tickets/update',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            const response = await fetch(`/api/tickets/${id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
+            await ticketsService.update(id, data);
 
-            if (!response.ok) {
-                throw new Error('Erreur lors de la mise à jour');
+            // Récupérer le ticket mis à jour
+            const updatedTicket = await ticketsService.getById(id);
+            if (!updatedTicket) {
+                throw new Error('Ticket non trouvé après mise à jour');
             }
 
-            const updatedTicket = await response.json();
-            toast.success('Ticket mis à jour', {
-                description: 'Le ticket a été modifié avec succès',
-            });
+            toast.success('Ticket mis à jour avec succès');
             return updatedTicket;
         } catch (error: any) {
-            toast.error('Erreur', {
-                description: error.message,
-            });
-            return rejectWithValue(error.message);
+            return rejectWithValue(error.message || 'Erreur lors de la mise à jour du ticket');
+        }
+    }
+);
+
+// Thunk pour supprimer un ticket
+export const deleteTicket = createAsyncThunk<string, string>(
+    'tickets/delete',
+    async (ticketId, { rejectWithValue }) => {
+        try {
+            await ticketsService.delete(ticketId);
+            toast.success('Ticket supprimé avec succès');
+            return ticketId;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Erreur lors de la suppression du ticket');
         }
     }
 );
@@ -180,12 +173,12 @@ const ticketSlice = createSlice({
             .addCase(fetchTickets.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.tickets = action.payload;
-                // Calculer les statistiques automatiquement
                 ticketSlice.caseReducers.calculateStats(state);
             })
             .addCase(fetchTickets.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
             });
 
         // Fetch ticket by ID
@@ -201,6 +194,7 @@ const ticketSlice = createSlice({
             .addCase(fetchTicketById.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
             });
 
         // Create ticket
@@ -217,6 +211,7 @@ const ticketSlice = createSlice({
             .addCase(createTicket.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
             });
 
         // Update ticket
@@ -227,11 +222,11 @@ const ticketSlice = createSlice({
             })
             .addCase(updateTicket.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const index = state.tickets.findIndex(t => t._id === action.payload._id);
+                const index = state.tickets.findIndex(t => t.id === action.payload.id);
                 if (index !== -1) {
                     state.tickets[index] = action.payload;
                 }
-                if (state.currentTicket?._id === action.payload._id) {
+                if (state.currentTicket?.id === action.payload.id) {
                     state.currentTicket = action.payload;
                 }
                 ticketSlice.caseReducers.calculateStats(state);
@@ -239,6 +234,27 @@ const ticketSlice = createSlice({
             .addCase(updateTicket.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
+            });
+
+        // Delete ticket
+        builder
+            .addCase(deleteTicket.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(deleteTicket.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.tickets = state.tickets.filter(t => t.id !== action.payload);
+                if (state.currentTicket?.id === action.payload) {
+                    state.currentTicket = null;
+                }
+                ticketSlice.caseReducers.calculateStats(state);
+            })
+            .addCase(deleteTicket.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
             });
     },
 });
