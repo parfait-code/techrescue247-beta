@@ -2,13 +2,12 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
-
 // Configuration Firebase Admin
 const firebaseAdminConfig = {
     credential: cert({
         projectId: process.env.FIREBASE_PROJECT_ID!,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL!,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY!.replace(/\\n/g, '\n'),
+        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // Remplacer les \n par des sauts de ligne
     }),
     databaseURL: process.env.FIREBASE_DATABASE_URL,
 };

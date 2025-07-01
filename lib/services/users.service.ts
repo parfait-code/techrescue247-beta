@@ -24,8 +24,13 @@ export class UsersService {
                 throw new Error('Cet email est déjà utilisé');
             }
 
+            // Vérifier que le mot de passe est fourni
+            if (!userData.password) {
+                throw new Error('Le mot de passe est requis');
+            }
+
             // Hasher le mot de passe
-            const hashedPassword = await bcrypt.hash(userData.password!, 10);
+            const hashedPassword = await bcrypt.hash(userData.password, 10);
 
             // Créer l'utilisateur dans Firebase Auth
             const authUser = await adminAuth.createUser({
@@ -49,9 +54,11 @@ export class UsersService {
             // Créer le document dans Firestore avec l'UID de Firebase Auth
             await this.collection.doc(authUser.uid).set(userDoc);
 
+            // Retourner l'utilisateur sans le mot de passe
+            const { password: _, ...userWithoutPassword } = userDoc;
             return {
                 id: authUser.uid,
-                ...userDoc,
+                ...userWithoutPassword,
             };
         } catch (error: any) {
             console.error('Error creating user:', error);
@@ -59,8 +66,8 @@ export class UsersService {
         }
     }
 
-    // Trouver un utilisateur par email
-    static async findByEmail(email: string): Promise<User | null> {
+    // Trouver un utilisateur par email (AVEC le mot de passe pour l'authentification)
+    static async findByEmailWithPassword(email: string): Promise<User | null> {
         try {
             const snapshot = await this.collection
                 .where('email', '==', email.toLowerCase())
@@ -82,6 +89,21 @@ export class UsersService {
         }
     }
 
+    // Trouver un utilisateur par email (SANS le mot de passe)
+    static async findByEmail(email: string): Promise<User | null> {
+        try {
+            const user = await this.findByEmailWithPassword(email);
+            if (!user) return null;
+
+            // Retourner sans le mot de passe
+            const { password: _, ...userWithoutPassword } = user;
+            return userWithoutPassword as User;
+        } catch (error) {
+            console.error('Error finding user by email:', error);
+            throw error;
+        }
+    }
+
     // Trouver un utilisateur par ID
     static async findById(id: string): Promise<User | null> {
         try {
@@ -91,9 +113,12 @@ export class UsersService {
                 return null;
             }
 
+            // Retourner sans le mot de passe
+            const userData = doc.data();
+            const { password: _, ...userWithoutPassword } = userData || {};
             return {
                 id: doc.id,
-                ...doc.data(),
+                ...userWithoutPassword,
             } as User;
         } catch (error) {
             console.error('Error finding user by id:', error);
@@ -103,7 +128,21 @@ export class UsersService {
 
     // Comparer le mot de passe
     static async comparePassword(candidatePassword: string, hashedPassword: string): Promise<boolean> {
-        return bcrypt.compare(candidatePassword, hashedPassword);
+        // Vérifier que les deux paramètres sont définis
+        if (!candidatePassword || !hashedPassword) {
+            console.error('Password comparison failed: missing parameters', {
+                candidatePassword: !!candidatePassword,
+                hashedPassword: !!hashedPassword
+            });
+            return false;
+        }
+
+        try {
+            return await bcrypt.compare(candidatePassword, hashedPassword);
+        } catch (error) {
+            console.error('Error comparing passwords:', error);
+            return false;
+        }
     }
 
     // Obtenir tous les utilisateurs
@@ -113,10 +152,15 @@ export class UsersService {
                 .orderBy('createdAt', 'desc')
                 .get();
 
-            return snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-            } as User));
+            return snapshot.docs.map(doc => {
+                const userData = doc.data();
+                // Retourner sans le mot de passe
+                const { password: _, ...userWithoutPassword } = userData;
+                return {
+                    id: doc.id,
+                    ...userWithoutPassword,
+                } as User;
+            });
         } catch (error) {
             console.error('Error fetching users:', error);
             throw error;

@@ -6,8 +6,16 @@ export async function POST(request: NextRequest) {
     try {
         const { email, password } = await request.json();
 
-        // Trouver l'utilisateur par email
-        const user = await UsersService.findByEmail(email);
+        // Validation des données d'entrée
+        if (!email || !password) {
+            return NextResponse.json(
+                { message: 'Email et mot de passe sont requis' },
+                { status: 400 }
+            );
+        }
+
+        // Trouver l'utilisateur par email AVEC le mot de passe
+        const user = await UsersService.findByEmailWithPassword(email);
         if (!user) {
             return NextResponse.json(
                 { message: 'Email ou mot de passe incorrect' },
@@ -15,8 +23,17 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        // Vérifier que le mot de passe existe dans la base de données
+        if (!user.password) {
+            console.error('User found but no password in database for email:', email);
+            return NextResponse.json(
+                { message: 'Erreur de configuration du compte' },
+                { status: 500 }
+            );
+        }
+
         // Vérifier le mot de passe
-        const isPasswordValid = await UsersService.comparePassword(password, user.password!);
+        const isPasswordValid = await UsersService.comparePassword(password, user.password);
         if (!isPasswordValid) {
             return NextResponse.json(
                 { message: 'Email ou mot de passe incorrect' },
