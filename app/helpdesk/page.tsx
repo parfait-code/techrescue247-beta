@@ -26,7 +26,6 @@ import {
   MessageCircle,
   Phone,
   Mail,
-  CheckCircle,
   ArrowRight,
   Globe,
   Sparkles,

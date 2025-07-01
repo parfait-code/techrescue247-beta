@@ -21,7 +21,7 @@ import {
   User,
   Ticket,
   Message,
-  timestampToDate,
+  timestampToDate
 } from '@/types/firebase';
 
 // ========== USERS SERVICE ==========

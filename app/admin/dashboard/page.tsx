@@ -165,9 +165,9 @@ export default function AdminDashboardPage() {
             </p>
           ) : (
             <div className="space-y-4">
-              {recentTickets.map((ticket) => (
+              {recentTickets.map((ticket, index) => (
                 <Link
-                  key={ticket._id}
+                  key={index}
                   href={`/admin/tickets`}
                   className="block"
                 >
@@ -224,8 +224,8 @@ export default function AdminDashboardPage() {
           </Link>
         </CardHeader>
         <CardContent>
-          {messages.slice(0, 5).map((message) => (
-            <div key={message._id} className="mb-4 last:mb-0">
+          {messages.slice(0, 5).map((message, index) => (
+            <div key={index} className="mb-4 last:mb-0">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">

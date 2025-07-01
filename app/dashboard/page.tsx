@@ -186,9 +186,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentTickets.map((ticket) => (
+              {recentTickets.map((ticket, index) => (
                 <div
-                  key={ticket._id}
+                  key={index}
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
                   onClick={() => openDetailsDialog(ticket)}
                 >

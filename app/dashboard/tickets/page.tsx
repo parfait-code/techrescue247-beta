@@ -225,8 +225,8 @@ export default function TicketsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredTickets.map((ticket) => (
-                    <TableRow key={ticket._id}>
+                  {filteredTickets.map((ticket, index) => (
+                    <TableRow key={index}>
                       <TableCell className="font-mono text-sm">
                         #{ticket._id.slice(-6)}
                       </TableCell>

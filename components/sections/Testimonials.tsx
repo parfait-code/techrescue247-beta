@@ -54,7 +54,7 @@ export function Testimonials({
                     ))}
                   </div>
                   <CardDescription className="text-gray-700">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -103,7 +103,7 @@ export function Testimonials({
                       ))}
                     </div>
                     <blockquote className="text-lg text-gray-700 mb-6 italic">
-                      "{testimonial.content}"
+                      &quot;{testimonial.content}&quot;
                     </blockquote>
                     <div>
                       <p className="font-semibold text-lg">
@@ -149,7 +149,7 @@ export function Testimonials({
                   ))}
                 </div>
                 <CardDescription className="text-base text-gray-700">
-                  "{testimonial.content}"
+                  &quot;{testimonial.content}&quot;
                 </CardDescription>
               </CardHeader>
               <CardContent>
