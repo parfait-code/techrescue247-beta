@@ -1,3 +1,4 @@
+// lib/services/messages.service.ts
 import { adminDb, COLLECTIONS, serverTimestamp } from '@/lib/firebase-admin';
 
 export interface Message {
@@ -12,6 +13,12 @@ export interface Message {
     adminNotes?: string;
     createdAt?: string;
     updatedAt?: string;
+    // Nouvelles métadonnées optionnelles
+    metadata?: {
+        ip?: string;
+        userAgent?: string;
+        referrer?: string;
+    };
 }
 
 export class MessagesService {
@@ -25,9 +32,14 @@ export class MessagesService {
                 status: 'new' as const,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
+                // Ajouter les métadonnées si fournies
+                metadata: messageData.metadata || {},
             };
 
             const docRef = await this.collection.add(messageDoc);
+
+            // Log pour monitoring (optionnel)
+            console.log(`New message created: ${docRef.id} from ${messageData.email}`);
 
             return {
                 id: docRef.id,
@@ -58,17 +70,48 @@ export class MessagesService {
         }
     }
 
-    // Obtenir tous les messages
-    static async findAll(): Promise<Message[]> {
+    // Obtenir tous les messages avec filtres optionnels
+    static async findAll(filters?: {
+        status?: Message['status'];
+        startDate?: Date;
+        endDate?: Date;
+        search?: string;
+    }): Promise<Message[]> {
         try {
-            const snapshot = await this.collection
-                .orderBy('createdAt', 'desc')
-                .get();
+            let query = this.collection.orderBy('createdAt', 'desc');
 
-            return snapshot.docs.map(doc => ({
+            // Appliquer les filtres si fournis
+            if (filters?.status) {
+                query = query.where('status', '==', filters.status);
+            }
+
+            if (filters?.startDate) {
+                query = query.where('createdAt', '>=', filters.startDate);
+            }
+
+            if (filters?.endDate) {
+                query = query.where('createdAt', '<=', filters.endDate);
+            }
+
+            const snapshot = await query.get();
+
+            let messages = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
             } as Message));
+
+            // Filtrer par recherche si nécessaire
+            if (filters?.search) {
+                const searchLower = filters.search.toLowerCase();
+                messages = messages.filter(msg =>
+                    msg.name.toLowerCase().includes(searchLower) ||
+                    msg.email.toLowerCase().includes(searchLower) ||
+                    msg.subject.toLowerCase().includes(searchLower) ||
+                    msg.message.toLowerCase().includes(searchLower)
+                );
+            }
+
+            return messages;
         } catch (error) {
             console.error('Error fetching messages:', error);
             throw error;
@@ -101,6 +144,7 @@ export class MessagesService {
     static async delete(id: string): Promise<boolean> {
         try {
             await this.collection.doc(id).delete();
+            console.log(`Message deleted: ${id}`);
             return true;
         } catch (error) {
             console.error('Error deleting message:', error);
@@ -115,10 +159,17 @@ export class MessagesService {
         readMessages: number;
         repliedMessages: number;
         archivedMessages: number;
+        todayMessages: number;
+        weekMessages: number;
     }> {
         try {
             const snapshot = await this.collection.get();
             const messages = snapshot.docs.map(doc => doc.data());
+
+            // Dates pour les statistiques
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
             return {
                 totalMessages: messages.length,
@@ -126,9 +177,38 @@ export class MessagesService {
                 readMessages: messages.filter(m => m.status === 'read').length,
                 repliedMessages: messages.filter(m => m.status === 'replied').length,
                 archivedMessages: messages.filter(m => m.status === 'archived').length,
+                todayMessages: messages.filter(m => {
+                    const createdAt = m.createdAt?.toDate?.() || new Date(m.createdAt);
+                    return createdAt >= today;
+                }).length,
+                weekMessages: messages.filter(m => {
+                    const createdAt = m.createdAt?.toDate?.() || new Date(m.createdAt);
+                    return createdAt >= weekAgo;
+                }).length,
             };
         } catch (error) {
             console.error('Error getting message stats:', error);
+            throw error;
+        }
+    }
+
+    // Marquer plusieurs messages comme lus
+    static async markAsRead(ids: string[]): Promise<void> {
+        try {
+            const batch = adminDb.batch();
+
+            ids.forEach(id => {
+                const docRef = this.collection.doc(id);
+                batch.update(docRef, {
+                    status: 'read',
+                    updatedAt: serverTimestamp(),
+                });
+            });
+
+            await batch.commit();
+            console.log(`Marked ${ids.length} messages as read`);
+        } catch (error) {
+            console.error('Error marking messages as read:', error);
             throw error;
         }
     }

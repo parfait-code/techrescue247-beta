@@ -26,6 +26,8 @@ const contactSchema = z.object({
   message: z
     .string()
     .min(20, "Le message doit contenir au moins 20 caractères"),
+  // Honeypot field - doit rester vide
+  website: z.string().optional(),
 });
 
 type ContactData = z.infer<typeof contactSchema>;
@@ -39,17 +41,36 @@ export function ContactForm() {
     handleSubmit,
     reset,
     formState: { errors },
+    watch,
   } = useForm<ContactData>({
     resolver: zodResolver(contactSchema),
+    defaultValues: {
+      website: "", // Honeypot
+    },
   });
 
   const onSubmit = async (data: ContactData) => {
+    // Vérifier le honeypot
+    if (data.website && data.website.length > 0) {
+      // Bot détecté - faire semblant que tout va bien
+      toast.success("Message envoyé avec succès", {
+        description: "Nous vous répondrons dans les plus brefs délais.",
+      });
+      setIsSuccess(true);
+      reset();
+      setTimeout(() => setIsSuccess(false), 5000);
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Retirer le champ honeypot avant l'envoi
+      const { website, ...messageData } = data;
+
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(messageData),
       });
 
       const result = await response.json();
@@ -209,6 +230,19 @@ export function ContactForm() {
                 {errors.message.message}
               </p>
             )}
+          </div>
+
+          {/* Honeypot field - caché avec CSS */}
+          <div
+            style={{ position: "absolute", left: "-5000px" }}
+            aria-hidden="true"
+          >
+            <Input
+              type="text"
+              {...register("website")}
+              tabIndex={-1}
+              autoComplete="off"
+            />
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
