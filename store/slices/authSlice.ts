@@ -1,14 +1,7 @@
 // store/slices/authSlice.ts
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import {
-    signInWithEmailAndPassword,
-    createUserWithEmailAndPassword,
-    User as FirebaseUser,
-    updateProfile
-} from 'firebase/auth';
-import { auth, db } from '@/lib/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { User as FirebaseUser } from 'firebase/auth';
 import { toast } from 'sonner';
 
 interface User {
@@ -34,7 +27,7 @@ interface RegisterCredentials {
 interface AuthState {
     user: User | null;
     firebaseUser: FirebaseUser | null;
-    token: string | null; // Ajouter le token JWT
+    token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
     error: string | null;
@@ -49,29 +42,18 @@ const initialState: AuthState = {
     error: null,
 };
 
-// Thunk pour la connexion
+// Thunk pour la connexion - UNIQUEMENT via l'API
 export const login = createAsyncThunk<
-    { user: User; firebaseUser: FirebaseUser; token: string },
+    { user: User; token: string },
     LoginCredentials
 >(
     'auth/login',
     async (credentials, { rejectWithValue }) => {
         try {
-            // 1. Connexion Firebase
-            const userCredential = await signInWithEmailAndPassword(
-                auth,
-                credentials.email,
-                credentials.password
-            );
-
-            // 2. Appel API pour obtenir le token JWT
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email: credentials.email,
-                    password: credentials.password,
-                }),
+                body: JSON.stringify(credentials),
             });
 
             if (!response.ok) {
@@ -81,64 +63,28 @@ export const login = createAsyncThunk<
 
             const { token, user } = await response.json();
 
-            // 3. Stocker le token dans localStorage
+            // Stocker le token dans localStorage
             localStorage.setItem('authToken', token);
 
-            return {
-                user,
-                firebaseUser: userCredential.user,
-                token,
-            };
+            return { user, token };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
     }
 );
 
-// Thunk pour l'inscription
+// Thunk pour l'inscription - UNIQUEMENT via l'API
 export const register = createAsyncThunk<
-    { user: User; firebaseUser: FirebaseUser; token: string },
+    { user: User; token: string },
     RegisterCredentials
 >(
     'auth/register',
     async (credentials, { rejectWithValue }) => {
         try {
-            // 1. Créer l'utilisateur Firebase
-            const userCredential = await createUserWithEmailAndPassword(
-                auth,
-                credentials.email,
-                credentials.password
-            );
-
-            await updateProfile(userCredential.user, {
-                displayName: credentials.name,
-            });
-
-            // 2. Créer le document Firestore
-            const userData: User = {
-                id: userCredential.user.uid,
-                name: credentials.name,
-                email: credentials.email,
-                phone: credentials.phone,
-                role: 'user',
-            };
-
-            await setDoc(doc(db, 'users', userCredential.user.uid), {
-                ...userData,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-            });
-
-            // 3. Appel API pour obtenir le token JWT
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: credentials.name,
-                    email: credentials.email,
-                    phone: credentials.phone,
-                    password: credentials.password,
-                }),
+                body: JSON.stringify(credentials),
             });
 
             if (!response.ok) {
@@ -146,16 +92,12 @@ export const register = createAsyncThunk<
                 throw new Error(error.message || 'Erreur lors de l\'inscription');
             }
 
-            const { token } = await response.json();
+            const { token, user } = await response.json();
 
-            // 4. Stocker le token
+            // Stocker le token
             localStorage.setItem('authToken', token);
 
-            return {
-                user: userData,
-                firebaseUser: userCredential.user,
-                token,
-            };
+            return { user, token };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -184,13 +126,8 @@ export const checkAuth = createAsyncThunk(
             }
 
             const { user } = await response.json();
-            const firebaseUser = auth.currentUser;
 
-            return {
-                user,
-                firebaseUser,
-                token,
-            };
+            return { user, token };
         } catch (error: any) {
             return rejectWithValue(error.message);
         }
@@ -228,7 +165,6 @@ const authSlice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.user = action.payload.user;
-                state.firebaseUser = action.payload.firebaseUser;
                 state.token = action.payload.token;
                 state.isAuthenticated = true;
                 toast.success('Connexion réussie');
@@ -239,17 +175,25 @@ const authSlice = createSlice({
                 toast.error(action.payload as string);
             })
             // Register
+            .addCase(register.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
             .addCase(register.fulfilled, (state, action) => {
+                state.isLoading = false;
                 state.user = action.payload.user;
-                state.firebaseUser = action.payload.firebaseUser;
                 state.token = action.payload.token;
                 state.isAuthenticated = true;
                 toast.success('Inscription réussie');
             })
+            .addCase(register.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+                toast.error(action.payload as string);
+            })
             // Check Auth
             .addCase(checkAuth.fulfilled, (state, action) => {
                 state.user = action.payload.user;
-                state.firebaseUser = action.payload.firebaseUser;
                 state.token = action.payload.token;
                 state.isAuthenticated = true;
             })
