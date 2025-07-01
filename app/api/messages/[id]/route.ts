@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import {
-    adminDb,
-    verifyFirebaseToken,
-    unauthorizedResponse,
-    forbiddenResponse
-} from '@/lib/firebase-admin';
-import { serverTimestamp } from 'firebase-admin/firestore';
+import { MessagesService } from '@/lib/services/messages.service';
+import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 
 // GET - Récupérer un message spécifique (Admin uniquement)
 export async function GET(
@@ -15,38 +10,20 @@ export async function GET(
     const params = await props.params;
 
     try {
-        // Vérifier l'authentification Firebase
-        const user = await verifyFirebaseToken(request);
-        if (!user) {
-            return unauthorizedResponse();
+        const token = getTokenFromRequest(request);
+        if (!token) {
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        // Seuls les admins peuvent voir les messages
-        if (user.role !== 'admin') {
-            return forbiddenResponse();
+        const payload = verifyToken(token);
+        if (!payload || payload.role !== 'admin') {
+            return NextResponse.json({ message: 'Accès refusé' }, { status: 403 });
         }
 
-        // Récupérer le message
-        const messageDoc = await adminDb
-            .collection('messages')
-            .doc(params.id)
-            .get();
-
-        if (!messageDoc.exists) {
-            return NextResponse.json(
-                { message: 'Message non trouvé' },
-                { status: 404 }
-            );
+        const message = await MessagesService.findById(params.id);
+        if (!message) {
+            return NextResponse.json({ message: 'Message non trouvé' }, { status: 404 });
         }
-
-        const data = messageDoc.data();
-        const message = {
-            id: messageDoc.id,
-            ...data,
-            createdAt: data?.createdAt?.toDate(),
-            updatedAt: data?.updatedAt?.toDate(),
-            repliedAt: data?.repliedAt?.toDate(),
-        };
 
         return NextResponse.json(message);
     } catch (error) {
@@ -66,57 +43,22 @@ export async function PATCH(
     const params = await props.params;
 
     try {
-        // Vérifier l'authentification Firebase
-        const user = await verifyFirebaseToken(request);
-        if (!user) {
-            return unauthorizedResponse();
+        const token = getTokenFromRequest(request);
+        if (!token) {
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        // Seuls les admins peuvent mettre à jour les messages
-        if (user.role !== 'admin') {
-            return forbiddenResponse();
+        const payload = verifyToken(token);
+        if (!payload || payload.role !== 'admin') {
+            return NextResponse.json({ message: 'Accès refusé' }, { status: 403 });
         }
 
         const data = await request.json();
+        const message = await MessagesService.update(params.id, data);
 
-        // Préparer les données de mise à jour
-        const updateData: any = {
-            ...data,
-            updatedAt: serverTimestamp(),
-        };
-
-        // Si le statut passe à "replied", ajouter la date de réponse
-        if (data.status === 'replied' && !data.repliedAt) {
-            updateData.repliedAt = serverTimestamp();
+        if (!message) {
+            return NextResponse.json({ message: 'Message non trouvé' }, { status: 404 });
         }
-
-        // Mettre à jour le message
-        await adminDb
-            .collection('messages')
-            .doc(params.id)
-            .update(updateData);
-
-        // Récupérer le message mis à jour
-        const updatedDoc = await adminDb
-            .collection('messages')
-            .doc(params.id)
-            .get();
-
-        if (!updatedDoc.exists) {
-            return NextResponse.json(
-                { message: 'Message non trouvé' },
-                { status: 404 }
-            );
-        }
-
-        const messageData = updatedDoc.data();
-        const message = {
-            id: updatedDoc.id,
-            ...messageData,
-            createdAt: messageData?.createdAt?.toDate(),
-            updatedAt: messageData?.updatedAt?.toDate(),
-            repliedAt: messageData?.repliedAt?.toDate(),
-        };
 
         return NextResponse.json(message);
     } catch (error) {
@@ -136,39 +78,22 @@ export async function DELETE(
     const params = await props.params;
 
     try {
-        // Vérifier l'authentification Firebase
-        const user = await verifyFirebaseToken(request);
-        if (!user) {
-            return unauthorizedResponse();
+        const token = getTokenFromRequest(request);
+        if (!token) {
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        // Seuls les admins peuvent supprimer les messages
-        if (user.role !== 'admin') {
-            return forbiddenResponse();
+        const payload = verifyToken(token);
+        if (!payload || payload.role !== 'admin') {
+            return NextResponse.json({ message: 'Accès refusé' }, { status: 403 });
         }
 
-        // Vérifier que le message existe
-        const messageDoc = await adminDb
-            .collection('messages')
-            .doc(params.id)
-            .get();
-
-        if (!messageDoc.exists) {
-            return NextResponse.json(
-                { message: 'Message non trouvé' },
-                { status: 404 }
-            );
+        const success = await MessagesService.delete(params.id);
+        if (!success) {
+            return NextResponse.json({ message: 'Message non trouvé' }, { status: 404 });
         }
 
-        // Supprimer le message
-        await adminDb
-            .collection('messages')
-            .doc(params.id)
-            .delete();
-
-        return NextResponse.json(
-            { message: 'Message supprimé avec succès' }
-        );
+        return NextResponse.json({ message: 'Message supprimé avec succès' });
     } catch (error) {
         console.error('Delete message error:', error);
         return NextResponse.json(

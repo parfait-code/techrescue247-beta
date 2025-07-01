@@ -1,65 +1,62 @@
-import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import Ticket from '@/models/Ticket'
-import { getTokenFromRequest, verifyToken } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server';
+import { TicketsService } from '@/lib/services/tickets.service';
+import { getTokenFromRequest, verifyToken } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
     try {
-        const token = getTokenFromRequest(request)
+        const token = getTokenFromRequest(request);
         if (!token) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        const payload = verifyToken(token)
+        const payload = verifyToken(token);
         if (!payload) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        await dbConnect()
-
-        let tickets
+        let tickets;
         if (payload.role === 'admin') {
-            tickets = await Ticket.find({}).populate('userId', 'name email phone').sort('-createdAt')
+            // Admin peut voir tous les tickets
+            tickets = await TicketsService.findAll();
         } else {
-            tickets = await Ticket.find({ userId: payload.userId }).sort('-createdAt')
+            // Les utilisateurs ne voient que leurs tickets
+            tickets = await TicketsService.findByUserId(payload.userId);
         }
 
-        return NextResponse.json(tickets)
+        return NextResponse.json(tickets);
     } catch (error) {
-        console.error('Get tickets error:', error)
+        console.error('Get tickets error:', error);
         return NextResponse.json(
             { message: 'Erreur serveur' },
             { status: 500 }
-        )
+        );
     }
 }
 
 export async function POST(request: NextRequest) {
     try {
-        const token = getTokenFromRequest(request)
+        const token = getTokenFromRequest(request);
         if (!token) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        const payload = verifyToken(token)
+        const payload = verifyToken(token);
         if (!payload) {
-            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
+            return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
         }
 
-        await dbConnect()
-
-        const data = await request.json()
-        const ticket = await Ticket.create({
+        const data = await request.json();
+        const ticket = await TicketsService.create({
             ...data,
             userId: payload.userId,
-        })
+        });
 
-        return NextResponse.json(ticket)
+        return NextResponse.json(ticket);
     } catch (error) {
-        console.error('Create ticket error:', error)
+        console.error('Create ticket error:', error);
         return NextResponse.json(
             { message: 'Erreur lors de la création du ticket' },
             { status: 500 }
-        )
+        );
     }
 }

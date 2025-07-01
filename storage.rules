@@ -1,0 +1,56 @@
+// Fichier: storage.rules
+// À configurer dans Firebase Console > Storage > Rules
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Fonction pour vérifier si l'utilisateur est authentifié
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Fonction pour vérifier si c'est le propriétaire du fichier
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Fonction pour vérifier si c'est un admin
+    function isAdmin() {
+      return request.auth != null && request.auth.token.role == 'admin';
+    }
+    
+    // Fonction pour valider le type de fichier
+    function isValidImageType() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    // Fonction pour valider la taille du fichier (max 5MB)
+    function isValidSize() {
+      return request.resource.size <= 5 * 1024 * 1024;
+    }
+    
+    // Règles pour les tickets
+    match /tickets/{userId}/{allPaths=**} {
+      // Lecture : propriétaire ou admin
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Écriture : propriétaire avec validation
+      allow write: if isOwner(userId) && isValidImageType() && isValidSize();
+      
+      // Suppression : propriétaire ou admin
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // Règles pour les avatars utilisateurs (futur)
+    match /avatars/{userId}/{fileName} {
+      allow read: if true; // Public
+      allow write: if isOwner(userId) && isValidImageType() && isValidSize();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+    
+    // Bloquer tout autre accès
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

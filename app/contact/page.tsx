@@ -15,7 +15,7 @@ export default function ContactPage() {
             <Link href="/" className="flex items-center">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Button>
             </Link>
             <h1 className="text-2xl font-bold text-primary">Techrescue247</h1>
@@ -30,8 +30,9 @@ export default function ContactPage() {
             Contactez-nous
           </h1>
           <p className="text-lg sm:text-xl max-w-3xl mx-auto">
-            Notre équipe est là pour répondre à toutes vos questions. N'hésitez
-            pas à nous contacter pour toute demande d'information.
+            Notre équipe est là pour répondre à toutes vos questions.
+            N&apos;hésitez pas à nous contacter pour toute demande
+            d&apos;information.
           </p>
         </div>
       </section>
@@ -76,7 +77,7 @@ export default function ContactPage() {
                 <div className="flex items-start space-x-3">
                   <Clock className="w-5 h-5 text-primary mt-1" />
                   <div>
-                    <p className="font-semibold">Heures d'ouverture</p>
+                    <p className="font-semibold">Heures d&apos;ouverture</p>
                     <p className="text-gray-600">Lun - Ven: 8h00 - 18h00</p>
                     <p className="text-gray-600">Sam: 9h00 - 14h00</p>
                     <p className="text-gray-600">Dim: Fermé</p>
@@ -98,7 +99,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <p className="font-semibold text-sm">
-                      Proposez-vous un support d'urgence ?
+                      Proposez-vous un support d&apos;urgence ?
                     </p>
                     <p className="text-gray-600 text-sm mt-1">
                       Oui, notre équipe est disponible 24/7 pour les urgences.
