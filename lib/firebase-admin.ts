@@ -1,6 +1,6 @@
 import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
 
 // Configuration Firebase Admin
@@ -25,6 +25,16 @@ if (!getApps().length) {
 // Exporter les services Firebase
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp);
+
+// Définir les collections
+export const COLLECTIONS = {
+    MESSAGES: 'messages',
+    USERS: 'users',
+    // Ajoutez d'autres collections selon vos besoins
+} as const;
+
+// Helper pour les timestamps Firebase
+export const serverTimestamp = () => FieldValue.serverTimestamp();
 
 /**
  * Vérifier un token Firebase ID
@@ -128,7 +138,7 @@ export async function createUserInFirestore(userData: {
     role?: 'user' | 'admin';
 }) {
     try {
-        const userRef = adminDb.collection('users').doc(userData.uid);
+        const userRef = adminDb.collection(COLLECTIONS.USERS).doc(userData.uid);
         const timestamp = new Date();
 
         await userRef.set({
@@ -143,29 +153,4 @@ export async function createUserInFirestore(userData: {
         console.error('Error creating user in Firestore:', error);
         throw error;
     }
-}
-
-/**
- * Mettre à jour les claims personnalisés d'un utilisateur
- */
-export async function setUserClaims(uid: string, claims: { role?: string }) {
-    try {
-        await adminAuth.setCustomUserClaims(uid, claims);
-        return true;
-    } catch (error) {
-        console.error('Error setting user claims:', error);
-        return false;
-    }
-}
-
-/**
- * Helper pour paginer les résultats Firestore
- */
-export function paginateQuery(
-    query: FirebaseFirestore.Query,
-    page: number = 1,
-    limit: number = 10
-) {
-    const offset = (page - 1) * limit;
-    return query.limit(limit).offset(offset);
 }
