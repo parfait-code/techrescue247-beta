@@ -39,26 +39,28 @@ export default function AdminDashboardPage() {
     isLoading: messagesLoading,
   } = useMessages();
 
-  // SUPPRIMEZ cette ligne qui cause la boucle infinie :
-  // dispatch(fetchMessages());
-
   useEffect(() => {
     // Charger les données nécessaires
     dispatch(fetchTickets());
     dispatch(fetchUsers());
-    dispatch(fetchMessages()); // AJOUTEZ cette ligne ICI dans le useEffect
+    dispatch(fetchMessages());
   }, [dispatch]);
 
+  // S'assurer que les tableaux existent
+  const safeTickets = Array.isArray(tickets) ? tickets : [];
+  const safeUsers = Array.isArray(users) ? users : [];
+  const safeMessages = Array.isArray(messages) ? messages : [];
+
   // Récupérer les tickets récents (5 derniers)
-  const recentTickets = tickets.slice(0, 5);
+  const recentTickets = safeTickets.slice(0, 5);
 
   const isLoading = ticketsLoading || usersLoading || messagesLoading;
 
   if (
     isLoading &&
-    tickets.length === 0 &&
-    users.length === 0 &&
-    messages.length === 0
+    safeTickets.length === 0 &&
+    safeUsers.length === 0 &&
+    safeMessages.length === 0
   ) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -66,194 +68,182 @@ export default function AdminDashboardPage() {
       </div>
     );
   }
+
+  // Calculer les statistiques de manière sûre
+  const safeStats = {
+    totalTickets: stats?.totalTickets || 0,
+    openTickets: stats?.openTickets || 0,
+    inProgressTickets: stats?.inProgressTickets || 0,
+    resolvedTickets: stats?.resolvedTickets || 0,
+  };
+
+  const safeMessageStats = {
+    newMessages: messageStats?.newMessages || 0,
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold mb-6">
         Tableau de bord administrateur
       </h1>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tickets</CardTitle>
-            <Ticket className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTickets}</div>
-            <p className="text-xs text-muted-foreground">Tous les tickets</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ouverts</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.openTickets}</div>
-            <p className="text-xs text-muted-foreground">
-              {((stats.openTickets / stats.totalTickets) * 100 || 0).toFixed(0)}
-              % du total
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">En cours</CardTitle>
-            <Clock className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.inProgressTickets}</div>
-            <p className="text-xs text-muted-foreground">En traitement</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Résolus</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.resolvedTickets}</div>
-            <p className="text-xs text-muted-foreground">
-              {(
-                (stats.resolvedTickets / stats.totalTickets) * 100 || 0
-              ).toFixed(0)}
-              % résolus
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{users.length}</div>
-            <p className="text-xs text-muted-foreground">Comptes actifs</p>
-          </CardContent>
-        </Card>
+      {/* Cartes de statistiques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Nouveaux Messages
+              Tickets totaux
             </CardTitle>
-            <MessageSquare className="h-4 w-4 text-blue-500" />
+            <Ticket className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{messageStats.newMessages}</div>
+            <div className="text-2xl font-bold">{safeStats.totalTickets}</div>
             <p className="text-xs text-muted-foreground">
-              {messageStats.totalMessages} messages au total
+              Tous les tickets créés
             </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Tickets ouverts
+            </CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{safeStats.openTickets}</div>
+            <p className="text-xs text-muted-foreground">En attente</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Utilisateurs totaux
+            </CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{safeUsers.length}</div>
+            <p className="text-xs text-muted-foreground">
+              Utilisateurs enregistrés
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Messages non lus
+            </CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {safeMessageStats.newMessages}
+            </div>
+            <p className="text-xs text-muted-foreground">Messages de contact</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Recent Tickets */}
-      <Card>
+      {/* Tickets récents */}
+      <Card className="mb-6">
         <CardHeader>
-          <CardTitle>Tickets Récents</CardTitle>
+          <CardTitle>Tickets récents</CardTitle>
           <CardDescription>Les 5 derniers tickets créés</CardDescription>
         </CardHeader>
         <CardContent>
-          {recentTickets.length === 0 ? (
-            <p className="text-center text-gray-600 py-8">
+          {recentTickets.map((ticket) => (
+            <div key={ticket._id} className="mb-4 pb-4 border-b last:border-0">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h4 className="font-semibold">{ticket.title}</h4>
+                  <p className="text-sm text-gray-600">
+                    Par: {ticket.user?.name || "Utilisateur inconnu"}
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <Badge className={getStatusColor(ticket.status)}>
+                      {ticket.status === "open"
+                        ? "Ouvert"
+                        : ticket.status === "in-progress"
+                        ? "En cours"
+                        : ticket.status === "resolved"
+                        ? "Résolu"
+                        : "Fermé"}
+                    </Badge>
+                    <Badge className={getPriorityColor(ticket.priority)}>
+                      {ticket.priority === "low"
+                        ? "Faible"
+                        : ticket.priority === "medium"
+                        ? "Moyen"
+                        : ticket.priority === "high"
+                        ? "Élevé"
+                        : "Urgent"}
+                    </Badge>
+                  </div>
+                </div>
+                <Link href={`/admin/tickets/${ticket._id}`}>
+                  <button className="text-blue-600 hover:text-blue-800">
+                    Voir →
+                  </button>
+                </Link>
+              </div>
+            </div>
+          ))}
+          {recentTickets.length === 0 && (
+            <p className="text-gray-500 text-center py-4">
               Aucun ticket pour le moment
             </p>
-          ) : (
-            <div className="space-y-4">
-              {recentTickets.map((ticket, index) => (
-                <Link
-                  key={index}
-                  href={`/admin/tickets`}
-                  className="block"
-                >
-                  <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{ticket.title}</h4>
-                      <p className="text-sm text-gray-600">
-                        Par {ticket.userId?.name || "Utilisateur supprimé"} -{" "}
-                        {formatDate(ticket.createdAt)}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {ticket.description.substring(0, 100)}
-                        {ticket.description.length > 100 && "..."}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          ticket.status
-                        )}`}
-                      >
-                        {ticket.status === "open" && "Ouvert"}
-                        {ticket.status === "in-progress" && "En cours"}
-                        {ticket.status === "resolved" && "Résolu"}
-                        {ticket.status === "closed" && "Fermé"}
-                      </span>
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                          ticket.priority
-                        )}`}
-                      >
-                        {ticket.priority === "low" && "Faible"}
-                        {ticket.priority === "medium" && "Moyen"}
-                        {ticket.priority === "high" && "Élevé"}
-                        {ticket.priority === "urgent" && "Urgent"}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
           )}
         </CardContent>
       </Card>
 
       {/* Messages récents */}
-      <Card className="mt-8">
+      <Card>
         <CardHeader>
           <CardTitle>Messages récents</CardTitle>
-          <Link href="/admin/messages">
-            <button className="text-sm text-primary hover:underline">
-              Voir tous les messages →
-            </button>
-          </Link>
+          <CardDescription>Messages de contact non lus</CardDescription>
         </CardHeader>
         <CardContent>
-          {messages.slice(0, 5).map((message, index) => (
-            <div key={index} className="mb-4 last:mb-0">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h4 className="font-medium">{message.name}</h4>
-                    <Badge
-                      variant="outline"
-                      className={
-                        message.status === "new"
-                          ? "bg-blue-100 text-blue-700"
-                          : "bg-gray-100 text-gray-700"
-                      }
-                    >
-                      {message.status === "new" ? "Nouveau" : "Lu"}
-                    </Badge>
+          {safeMessages
+            .filter((message) => message.status === "new")
+            .slice(0, 5)
+            .map((message) => (
+              <div
+                key={message._id}
+                className="mb-4 pb-4 border-b last:border-0"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{message.name}</h4>
+                    <p className="text-sm text-gray-600">{message.email}</p>
+                    <div className="mt-2">
+                      <Badge
+                        className={
+                          message.status === "new"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
+                        }
+                      >
+                        {message.status === "new" ? "Nouveau" : "Lu"}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-gray-600 line-clamp-1">
+                      {message.subject}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formatDate(message.createdAt)}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 line-clamp-1">
-                    {message.subject}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {formatDate(message.createdAt)}
-                  </p>
                 </div>
               </div>
-            </div>
-          ))}
-          {messages.length === 0 && (
+            ))}
+          {safeMessages.filter((message) => message.status === "new").length ===
+            0 && (
             <p className="text-gray-500 text-center py-4">
-              Aucun message pour le moment
+              Aucun message non lu
             </p>
           )}
         </CardContent>
@@ -290,9 +280,12 @@ export default function AdminDashboardPage() {
                   Taux de résolution
                 </span>
                 <span className="text-sm font-medium">
-                  {(
-                    (stats.resolvedTickets / stats.totalTickets) * 100 || 0
-                  ).toFixed(1)}
+                  {safeStats.totalTickets > 0
+                    ? (
+                        (safeStats.resolvedTickets / safeStats.totalTickets) *
+                        100
+                      ).toFixed(1)
+                    : 0}
                   %
                 </span>
               </div>
@@ -300,7 +293,7 @@ export default function AdminDashboardPage() {
                 <span className="text-sm text-gray-600">Tickets urgents</span>
                 <span className="text-sm font-medium">
                   {
-                    tickets.filter(
+                    safeTickets.filter(
                       (t) => t.priority === "urgent" && t.status !== "closed"
                     ).length
                   }
@@ -309,7 +302,7 @@ export default function AdminDashboardPage() {
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Admins actifs</span>
                 <span className="text-sm font-medium">
-                  {users.filter((u) => u.role === "admin").length}
+                  {safeUsers.filter((u) => u.role === "admin").length}
                 </span>
               </div>
             </div>

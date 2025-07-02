@@ -2,6 +2,7 @@ import { initializeApp, getApps, cert, App } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { NextResponse } from 'next/server';
+
 // Configuration Firebase Admin
 const firebaseAdminConfig = {
     credential: cert({
@@ -25,11 +26,11 @@ if (!getApps().length) {
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp);
 
-// Définir les collections
+// Définir TOUTES les collections nécessaires
 export const COLLECTIONS = {
     MESSAGES: 'messages',
     USERS: 'users',
-    // Ajoutez d'autres collections selon vos besoins
+    TICKETS: 'tickets', // AJOUT DE LA COLLECTION TICKETS
 } as const;
 
 // Helper pour les timestamps Firebase

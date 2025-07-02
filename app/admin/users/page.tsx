@@ -112,12 +112,27 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch("/api/users");
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
+      // Importer le client API
+      const { apiClient } = await import("@/lib/api-client");
+
+      const data = await apiClient.getUsers();
+
+      // S'assurer que data est un tableau
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else if (data.users && Array.isArray(data.users)) {
+        setUsers(data.users);
+      } else {
+        console.error("Format de données inattendu:", data);
+        setUsers([]);
+        toast.error("Format de données inattendu");
+      }
+    } catch (error: any) {
       console.error("Error fetching users:", error);
-      toast.error("Erreur lors du chargement des utilisateurs");
+      toast.error(
+        error.message || "Erreur lors du chargement des utilisateurs"
+      );
+      setUsers([]); // Définir un tableau vide en cas d'erreur
     } finally {
       setLoading(false);
     }
@@ -125,32 +140,22 @@ export default function AdminUsersPage() {
 
   const updateUserRole = async (userId: string, newRole: UserRole) => {
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role: newRole }),
-      });
+      const { apiClient } = await import("@/lib/api-client");
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la mise à jour");
-      }
+      await apiClient.updateUser(userId, { role: newRole });
 
       toast.success("Rôle mis à jour avec succès");
       fetchUsers();
-    } catch (error) {
-      toast.error("Impossible de mettre à jour le rôle");
+    } catch (error: any) {
+      toast.error(error.message || "Impossible de mettre à jour le rôle");
     }
   };
 
   const deleteUser = async (userId: string) => {
     try {
-      const response = await fetch(`/api/users/${userId}`, {
-        method: "DELETE",
-      });
+      const { apiClient } = await import("@/lib/api-client");
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la suppression");
-      }
+      await apiClient.deleteUser(userId);
 
       toast.success("Utilisateur supprimé avec succès");
       fetchUsers();
@@ -158,8 +163,8 @@ export default function AdminUsersPage() {
         setDetailsDialogOpen(false);
         setSelectedUser(null);
       }
-    } catch (error) {
-      toast.error("Impossible de supprimer l'utilisateur");
+    } catch (error: any) {
+      toast.error(error.message || "Impossible de supprimer l'utilisateur");
     }
   };
 
@@ -193,8 +198,11 @@ export default function AdminUsersPage() {
     setConfirmAction(null);
   };
 
+  // S'assurer que users est toujours un tableau
+  const safeUsers = Array.isArray(users) ? users : [];
+
   // Filtrer et trier les utilisateurs
-  const filteredAndSortedUsers = users
+  const filteredAndSortedUsers = safeUsers
     .filter((user) => {
       const matchesSearch =
         user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -313,18 +321,18 @@ export default function AdminUsersPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="text-center">
               <p className="text-sm text-gray-600">Total utilisateurs</p>
-              <p className="text-3xl font-bold">{users.length}</p>
+              <p className="text-3xl font-bold">{safeUsers.length}</p>
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600">Administrateurs</p>
               <p className="text-3xl font-bold text-blue-600">
-                {users?.filter((u) => u.role === "admin").length}
+                {safeUsers.filter((u) => u.role === "admin").length}
               </p>
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600">Utilisateurs standards</p>
               <p className="text-3xl font-bold text-gray-600">
-                {users.filter((u) => u.role === "user").length}
+                {safeUsers.filter((u) => u.role === "user").length}
               </p>
             </div>
           </div>
@@ -435,20 +443,11 @@ export default function AdminUsersPage() {
                   {filteredAndSortedUsers.map((user, index) => (
                     <TableRow key={user._id}>
                       <TableCell className="font-medium">{index + 1}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <RoleIcon role={user.role} />
-                          <span className="font-medium">{user.name}</span>
-                        </div>
-                      </TableCell>
+                      <TableCell className="font-medium">{user.name}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.phone}</TableCell>
                       <TableCell>{getRoleBadge(user.role)}</TableCell>
-                      <TableCell>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(user.createdAt)}
-                        </span>
-                      </TableCell>
+                      <TableCell>{formatDate(user.createdAt)}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -541,18 +540,7 @@ export default function AdminUsersPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setDetailsDialogOpen(true);
-                        }}
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Détails
-                      </Button>
+                    <div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
@@ -560,6 +548,16 @@ export default function AdminUsersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setDetailsDialogOpen(true);
+                            }}
+                          >
+                            <Eye className="w-4 h-4 mr-2" />
+                            Voir détails
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() =>
                               openConfirmDialog({
@@ -622,76 +620,73 @@ export default function AdminUsersPage() {
               {/* En-tête avec nom et rôle */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
-                    <RoleIcon role={selectedUser.role} />
+                  <RoleIcon role={selectedUser.role} />
+                  <h3 className="text-xl font-semibold">{selectedUser.name}</h3>
+                </div>
+                {getRoleBadge(selectedUser.role)}
+              </div>
+
+              <Separator />
+
+              {/* Informations détaillées */}
+              <div className="grid gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">ID</p>
+                    <p className="flex items-center gap-2">
+                      <Hash className="w-4 h-4 text-gray-400" />
+                      <code className="text-xs bg-gray-100 px-2 py-1 rounded">
+                        {selectedUser._id}
+                      </code>
+                    </p>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">
-                      {selectedUser.name}
-                    </h3>
-                    {getRoleBadge(selectedUser.role)}
+                    <p className="text-sm text-gray-500 mb-1">Email</p>
+                    <p className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      {selectedUser.email}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <Separator />
-
-              {/* Informations de contact */}
-              <div>
-                <h4 className="font-medium mb-3">Informations de contact</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{selectedUser.email}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Téléphone</p>
+                    <p className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      {selectedUser.phone}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-500">Téléphone</p>
-                      <p className="font-medium">{selectedUser.phone}</p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">Rôle</p>
+                    <p className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-gray-400" />
+                      {selectedUser.role === "admin"
+                        ? "Administrateur"
+                        : "Utilisateur"}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <Separator />
-
-              {/* Informations système */}
-              <div>
-                <h4 className="font-medium mb-3">Informations système</h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex items-center gap-2">
-                    <Hash className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-500">ID Utilisateur</p>
-                      <p className="font-mono text-sm">{selectedUser._id}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    <div>
-                      <p className="text-sm text-gray-500">
-                        Date d&apos;inscription
-                      </p>
-                      <p className="font-medium">
-                        {formatDate(selectedUser.createdAt)}
-                      </p>
-                    </div>
+                  <div>
+                    <p className="text-sm text-gray-500 mb-1">
+                      Date d&apos;inscription
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      {formatDate(selectedUser.createdAt)}
+                    </p>
                   </div>
                   {selectedUser.updatedAt && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-gray-500" />
-                      <div>
-                        <p className="text-sm text-gray-500">
-                          Dernière modification
-                        </p>
-                        <p className="font-medium">
-                          {formatDate(selectedUser.updatedAt)}
-                        </p>
-                      </div>
+                    <div>
+                      <p className="text-sm text-gray-500 mb-1">
+                        Dernière modification
+                      </p>
+                      <p className="flex items-center gap-2">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        {formatDate(selectedUser.updatedAt)}
+                      </p>
                     </div>
                   )}
                 </div>
@@ -700,53 +695,50 @@ export default function AdminUsersPage() {
               <Separator />
 
               {/* Actions */}
-              <div className="flex justify-between items-center">
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setDetailsDialogOpen(false);
-                      openConfirmDialog({
-                        type: "role",
-                        userId: selectedUser._id,
-                        userName: selectedUser.name,
-                        newRole:
-                          selectedUser.role === "admin" ? "user" : "admin",
-                      });
-                    }}
-                  >
-                    {selectedUser.role === "admin" ? (
-                      <>
-                        <UserCheck className="w-4 h-4 mr-2" />
-                        Passer utilisateur
-                      </>
-                    ) : (
-                      <>
-                        <ShieldCheck className="w-4 h-4 mr-2" />
-                        Passer admin
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      setDetailsDialogOpen(false);
-                      openConfirmDialog({
-                        type: "delete",
-                        userId: selectedUser._id,
-                        userName: selectedUser.name,
-                      });
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Supprimer
-                  </Button>
-                </div>
+              <div className="flex justify-end gap-2">
                 <Button
                   variant="outline"
                   onClick={() => setDetailsDialogOpen(false)}
                 >
                   Fermer
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setDetailsDialogOpen(false);
+                    openConfirmDialog({
+                      type: "role",
+                      userId: selectedUser._id,
+                      userName: selectedUser.name,
+                      newRole: selectedUser.role === "admin" ? "user" : "admin",
+                    });
+                  }}
+                >
+                  {selectedUser.role === "admin" ? (
+                    <>
+                      <UserCheck className="w-4 h-4 mr-2" />
+                      Passer utilisateur
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck className="w-4 h-4 mr-2" />
+                      Passer admin
+                    </>
+                  )}
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setDetailsDialogOpen(false);
+                    openConfirmDialog({
+                      type: "delete",
+                      userId: selectedUser._id,
+                      userName: selectedUser.name,
+                    });
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Supprimer
                 </Button>
               </div>
             </div>
@@ -758,33 +750,24 @@ export default function AdminUsersPage() {
       <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmAction?.type === "delete"
-                ? "Confirmer la suppression"
-                : "Confirmer le changement de rôle"}
-            </AlertDialogTitle>
+            <AlertDialogTitle>Confirmer l&apos;action</AlertDialogTitle>
             <AlertDialogDescription>
-              {confirmAction?.type === "delete" ? (
+              {confirmAction?.type === "role" ? (
                 <>
-                  Êtes-vous sûr de vouloir supprimer l&apos;utilisateur{" "}
-                  <span className="font-semibold">
-                    {confirmAction.userName}
-                  </span>{" "}
-                  ? Cette action est irréversible.
+                  Êtes-vous sûr de vouloir changer le rôle de{" "}
+                  <strong>{confirmAction.userName}</strong> en{" "}
+                  <strong>
+                    {confirmAction.newRole === "admin"
+                      ? "administrateur"
+                      : "utilisateur"}
+                  </strong>{" "}
+                  ?
                 </>
               ) : (
                 <>
-                  Êtes-vous sûr de vouloir changer le rôle de{" "}
-                  <span className="font-semibold">
-                    {confirmAction?.userName}
-                  </span>{" "}
-                  en{" "}
-                  <span className="font-semibold">
-                    {confirmAction?.newRole === "admin"
-                      ? "Administrateur"
-                      : "Utilisateur"}
-                  </span>{" "}
-                  ?
+                  Êtes-vous sûr de vouloir supprimer l&apos;utilisateur{" "}
+                  <strong>{confirmAction?.userName}</strong> ? Cette action est
+                  irréversible.
                 </>
               )}
             </AlertDialogDescription>
@@ -793,11 +776,7 @@ export default function AdminUsersPage() {
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
               onClick={executeConfirmedAction}
-              className={
-                confirmAction?.type === "delete"
-                  ? "bg-red-600 hover:bg-red-700"
-                  : ""
-              }
+              className={confirmAction?.type === "delete" ? "bg-red-600" : ""}
             >
               {confirmAction?.type === "delete" ? "Supprimer" : "Confirmer"}
             </AlertDialogAction>
