@@ -318,7 +318,7 @@ export default function AdminUsersPage() {
             <div className="text-center">
               <p className="text-sm text-gray-600">Administrateurs</p>
               <p className="text-3xl font-bold text-blue-600">
-                {users.filter((u) => u.role === "admin").length}
+                {users?.filter((u) => u.role === "admin").length}
               </p>
             </div>
             <div className="text-center">

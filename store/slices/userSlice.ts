@@ -1,40 +1,63 @@
+// store/slices/userSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { usersService } from '@/lib/firebase-services';
-import { User } from '@/types/firebase';
 import { toast } from 'sonner';
+
+interface User {
+    _id: string;
+    name: string;
+    email: string;
+    phone: string;
+    role: 'user' | 'admin';
+    createdAt?: string;
+    updatedAt?: string;
+}
 
 interface UserState {
     users: User[];
-    selectedUser: User | null;
+    currentUser: User | null;
     isLoading: boolean;
     error: string | null;
-    stats: {
-        totalUsers: number;
-        adminUsers: number;
-        regularUsers: number;
-    };
 }
 
 const initialState: UserState = {
     users: [],
-    selectedUser: null,
+    currentUser: null,
     isLoading: false,
     error: null,
-    stats: {
-        totalUsers: 0,
-        adminUsers: 0,
-        regularUsers: 0,
-    },
 };
 
-// Thunk pour récupérer tous les utilisateurs (admin seulement)
-export const fetchUsers = createAsyncThunk<User[]>(
+// Helper pour obtenir le token
+const getAuthToken = () => {
+    return localStorage.getItem('authToken');
+};
+
+// Helper pour les headers authentifiés
+const getAuthHeaders = () => {
+    const token = getAuthToken();
+    return {
+        'Content-Type': 'application/json',
+        'Authorization': token ? `Bearer ${token}` : '',
+    };
+};
+
+// Thunk pour récupérer tous les utilisateurs (admin)
+export const fetchUsers = createAsyncThunk(
     'users/fetchAll',
     async (_, { rejectWithValue }) => {
         try {
-            const users = await usersService.getAll();
-            return users;
+            const response = await fetch('/api/users', {
+                headers: getAuthHeaders(),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Erreur lors du chargement des utilisateurs');
+            }
+
+            const data = await response.json();
+            return data.users || data; // Gérer les deux formats de réponse possibles
         } catch (error: any) {
+            console.error('Erreur fetchUsers:', error);
             return rejectWithValue(error.message || 'Erreur lors du chargement des utilisateurs');
         }
     }
@@ -45,11 +68,17 @@ export const fetchUserById = createAsyncThunk<User, string>(
     'users/fetchById',
     async (userId, { rejectWithValue }) => {
         try {
-            const user = await usersService.getById(userId);
-            if (!user) {
-                throw new Error('Utilisateur non trouvé');
+            const response = await fetch(`/api/users/${userId}`, {
+                headers: getAuthHeaders(),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Utilisateur non trouvé');
             }
-            return user;
+
+            const user = await response.json();
+            return user.data || user; // Gérer les deux formats
         } catch (error: any) {
             return rejectWithValue(error.message || 'Erreur lors du chargement de l\'utilisateur');
         }
@@ -59,30 +88,50 @@ export const fetchUserById = createAsyncThunk<User, string>(
 // Thunk pour mettre à jour un utilisateur
 export const updateUser = createAsyncThunk<
     User,
-    {
-        id: string;
-        data: Partial<{
-            name: string;
-            phone: string;
-            role: 'user' | 'admin';
-        }>;
-    }
+    { id: string; data: Partial<User> }
 >(
     'users/update',
     async ({ id, data }, { rejectWithValue }) => {
         try {
-            await usersService.update(id, data);
+            const response = await fetch(`/api/users/${id}`, {
+                method: 'PATCH',
+                headers: getAuthHeaders(),
+                body: JSON.stringify(data),
+            });
 
-            // Récupérer l'utilisateur mis à jour
-            const updatedUser = await usersService.getById(id);
-            if (!updatedUser) {
-                throw new Error('Utilisateur non trouvé après mise à jour');
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Erreur lors de la mise à jour');
             }
 
+            const user = await response.json();
             toast.success('Utilisateur mis à jour');
-            return updatedUser;
+            return user.data || user;
         } catch (error: any) {
             return rejectWithValue(error.message || 'Erreur lors de la mise à jour');
+        }
+    }
+);
+
+// Thunk pour supprimer un utilisateur
+export const deleteUser = createAsyncThunk<string, string>(
+    'users/delete',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await fetch(`/api/users/${userId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders(),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || 'Erreur lors de la suppression');
+            }
+
+            toast.success('Utilisateur supprimé');
+            return userId;
+        } catch (error: any) {
+            return rejectWithValue(error.message || 'Erreur lors de la suppression');
         }
     }
 );
@@ -91,18 +140,14 @@ const userSlice = createSlice({
     name: 'users',
     initialState,
     reducers: {
-        setSelectedUser: (state, action) => {
-            state.selectedUser = action.payload;
+        setCurrentUser: (state, action) => {
+            state.currentUser = action.payload;
+        },
+        clearCurrentUser: (state) => {
+            state.currentUser = null;
         },
         clearError: (state) => {
             state.error = null;
-        },
-        calculateStats: (state) => {
-            state.stats = {
-                totalUsers: state.users.length,
-                adminUsers: state.users.filter(u => u.role === 'admin').length,
-                regularUsers: state.users.filter(u => u.role === 'user').length,
-            };
         },
     },
     extraReducers: (builder) => {
@@ -115,7 +160,6 @@ const userSlice = createSlice({
             .addCase(fetchUsers.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.users = action.payload;
-                userSlice.caseReducers.calculateStats(state);
             })
             .addCase(fetchUsers.rejected, (state, action) => {
                 state.isLoading = false;
@@ -131,7 +175,7 @@ const userSlice = createSlice({
             })
             .addCase(fetchUserById.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.selectedUser = action.payload;
+                state.currentUser = action.payload;
             })
             .addCase(fetchUserById.rejected, (state, action) => {
                 state.isLoading = false;
@@ -147,16 +191,34 @@ const userSlice = createSlice({
             })
             .addCase(updateUser.fulfilled, (state, action) => {
                 state.isLoading = false;
-                const index = state.users.findIndex(u => u.id === action.payload.id);
+                const index = state.users.findIndex(u => u._id === action.payload._id);
                 if (index !== -1) {
                     state.users[index] = action.payload;
                 }
-                if (state.selectedUser?.id === action.payload.id) {
-                    state.selectedUser = action.payload;
+                if (state.currentUser?._id === action.payload._id) {
+                    state.currentUser = action.payload;
                 }
-                userSlice.caseReducers.calculateStats(state);
             })
             .addCase(updateUser.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.payload as string;
+                toast.error('Erreur', { description: state.error });
+            });
+
+        // Delete user
+        builder
+            .addCase(deleteUser.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.users = state.users.filter(u => u._id !== action.payload);
+                if (state.currentUser?._id === action.payload) {
+                    state.currentUser = null;
+                }
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.payload as string;
                 toast.error('Erreur', { description: state.error });
@@ -164,5 +226,5 @@ const userSlice = createSlice({
     },
 });
 
-export const { setSelectedUser, clearError, calculateStats } = userSlice.actions;
+export const { setCurrentUser, clearCurrentUser, clearError } = userSlice.actions;
 export default userSlice.reducer;
