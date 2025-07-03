@@ -104,11 +104,14 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero Section avec HelpDesk */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-primary to-blue-700 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
-            <Badge variant="secondary" className="mb-4 px-4 py-1">
+            <Badge
+              variant="secondary"
+              className="mb-4 px-4 py-1 bg-blue-500/20 text-blue-100 border-blue-400"
+            >
               <Sparkles className="w-4 h-4 mr-1" />
               Support IT Premium 24/7
             </Badge>
@@ -126,7 +129,10 @@ export default function HomePage() {
               {isAuthenticated ? (
                 <>
                   <Link href="/dashboard/tickets/new">
-                    <Button size="lg" className="text-base sm:text-lg">
+                    <Button
+                      size="lg"
+                      className="text-base sm:text-lg bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                    >
                       Créer un ticket
                     </Button>
                   </Link>
@@ -134,7 +140,7 @@ export default function HomePage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-base sm:text-lg"
+                      className="text-base sm:text-lg border-white text-blue-600 hover:bg-blue-400 hover:text-blue-600"
                     >
                       Nous contacter
                     </Button>
@@ -143,7 +149,10 @@ export default function HomePage() {
               ) : (
                 <>
                   <Link href="/register">
-                    <Button size="lg" className="text-base sm:text-lg">
+                    <Button
+                      size="lg"
+                      className="text-base sm:text-lg bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+                    >
                       Commencer maintenant
                     </Button>
                   </Link>
@@ -151,7 +160,7 @@ export default function HomePage() {
                     <Button
                       size="lg"
                       variant="outline"
-                      className="text-base sm:text-lg"
+                      className="text-base sm:text-lg border-white bg-transparent text-white hover:bg-white hover:text-blue-600"
                     >
                       Nous contacter
                     </Button>
@@ -160,7 +169,7 @@ export default function HomePage() {
               )}
             </div>
             {/* Features rapides */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl mx-auto mt-12">
               <div className="flex items-center justify-center space-x-2">
                 <Clock className="w-6 h-6 text-blue-200" />
                 <span className="text-lg">Réponse {`<`} 2h</span>
@@ -184,7 +193,7 @@ export default function HomePage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-primary mb-2">
+                <div className="text-3xl sm:text-4xl font-bold text-blue-600 mb-2">
                   {stat.value}
                 </div>
                 <div className="text-gray-600">{stat.label}</div>
@@ -213,11 +222,11 @@ export default function HomePage() {
               return (
                 <Card
                   key={index}
-                  className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+                  className="hover:shadow-lg transition-all duration-300 hover:-translate-y-1 hover:border-blue-300"
                 >
                   <CardHeader>
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
-                      <Icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 bg-blue-600/10 rounded-lg flex items-center justify-center mb-4">
+                      <Icon className="w-6 h-6 text-blue-600" />
                     </div>
                     <CardTitle className="text-xl">{service.title}</CardTitle>
                   </CardHeader>
@@ -228,7 +237,7 @@ export default function HomePage() {
                     <Link href={service.href}>
                       <Button
                         variant="ghost"
-                        className="p-0 h-auto font-medium"
+                        className="p-0 h-auto font-medium text-blue-600 hover:text-blue-700"
                       >
                         En savoir plus
                         <ArrowRight className="ml-1 w-4 h-4" />
@@ -242,7 +251,11 @@ export default function HomePage() {
 
           <div className="text-center mt-12">
             <Link href="/services">
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+              >
                 Voir tous nos services
               </Button>
             </Link>
@@ -264,13 +277,16 @@ export default function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="hover:shadow-lg transition-shadow">
+              <Card
+                key={index}
+                className="hover:shadow-lg transition-shadow hover:border-blue-300"
+              >
                 <CardHeader>
                   <div className="flex mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
                       <Star
                         key={i}
-                        className="w-5 h-5 fill-yellow-400 text-yellow-400"
+                        className="w-5 h-5 fill-blue-600 text-blue-600"
                       />
                     ))}
                   </div>
@@ -280,8 +296,8 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-                      <User className="w-6 h-6 text-gray-600" />
+                    <div className="w-12 h-12 bg-blue-600/10 rounded-full flex items-center justify-center mr-4">
+                      <User className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
                       <p className="font-semibold">{testimonial.name}</p>
@@ -333,8 +349,8 @@ export default function HomePage() {
                   const Icon = item.icon;
                   return (
                     <div key={index} className="flex items-start space-x-4">
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <Icon className="w-6 h-6 text-primary" />
+                      <div className="w-12 h-12 bg-blue-600/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <Icon className="w-6 h-6 text-blue-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg mb-1">
@@ -347,11 +363,11 @@ export default function HomePage() {
                 })}
               </div>
             </div>
-            <div className="bg-gray-100 rounded-2xl p-8 lg:p-12">
-              <h3 className="text-2xl font-bold mb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 lg:p-12">
+              <h3 className="text-2xl font-bold mb-6 text-blue-900">
                 Prêt à optimiser votre IT ?
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-blue-700 mb-6">
                 Rejoignez les milliers d`&apos;entreprises qui nous font
                 confiance pour leur infrastructure informatique.
               </p>
@@ -363,20 +379,26 @@ export default function HomePage() {
                   "Satisfaction garantie",
                 ].map((item, index) => (
                   <li key={index} className="flex items-center">
-                    <CheckCircle className="w-5 h-5 text-green-500 mr-3" />
-                    <span>{item}</span>
+                    <CheckCircle className="w-5 h-5 text-blue-600 mr-3" />
+                    <span className="text-blue-800">{item}</span>
                   </li>
                 ))}
               </ul>
               {isAuthenticated ? (
                 <Link href="/dashboard/tickets/new">
-                  <Button size="lg" className="w-full">
+                  <Button
+                    size="lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  >
                     Créer mon premier ticket
                   </Button>
                 </Link>
               ) : (
                 <Link href="/register">
-                  <Button size="lg" className="w-full">
+                  <Button
+                    size="lg"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold"
+                  >
                     Démarrer gratuitement
                   </Button>
                 </Link>
@@ -387,10 +409,10 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-primary text-white">
+      <section className="py-20 bg-blue-600 text-white">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Besoin d`&apos;aide immédiate ?
+            Besoin d&apos;aide immédiate ?
           </h2>
           <p className="text-xl mb-8 text-blue-100">
             Notre équipe d`&apos;experts est disponible 24/7 pour résoudre vos
@@ -398,7 +420,11 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/contact">
-              <Button size="lg" variant="secondary">
+              <Button
+                size="lg"
+                variant="secondary"
+                className="bg-white text-blue-600 hover:bg-blue-50 font-semibold"
+              >
                 <Phone className="mr-2" />
                 Nous contacter
               </Button>
@@ -407,7 +433,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="bg-white/10 text-white border-white hover:bg-white hover:text-primary"
+                className="bg-white/10 text-white border-white hover:bg-white hover:text-blue-600 font-semibold"
               >
                 <MessageCircle className="mr-2" />
                 Chat en direct
