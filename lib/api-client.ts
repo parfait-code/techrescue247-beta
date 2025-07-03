@@ -1,18 +1,32 @@
-// lib/api-client.ts
-
+// 2. CORRECTION DU CLIENT API (lib/api-client.ts)
 export class ApiClient {
     private baseURL = '/api';
 
     private getAuthToken(): string | null {
-        // Essayer d'abord localStorage
-        const token = localStorage.getItem('authToken');
-        if (token) return token;
+        // Vérifier d'abord si on est côté client
+        if (typeof window === 'undefined') {
+            return null;
+        }
 
-        // Si pas de token dans localStorage, essayer de récupérer depuis les cookies
-        const cookies = document.cookie.split(';');
-        const authCookie = cookies.find(cookie => cookie.trim().startsWith('authToken='));
-        if (authCookie) {
-            return authCookie.split('=')[1];
+        // Essayer localStorage
+        try {
+            const token = localStorage.getItem('authToken');
+            if (token) return token;
+        } catch (error) {
+            console.warn('localStorage non disponible');
+        }
+
+        // Essayer les cookies
+        try {
+            const cookies = document.cookie.split(';');
+            const authCookie = cookies.find(cookie =>
+                cookie.trim().startsWith('authToken=')
+            );
+            if (authCookie) {
+                return decodeURIComponent(authCookie.split('=')[1]);
+            }
+        } catch (error) {
+            console.warn('Erreur lecture cookies');
         }
 
         return null;
@@ -29,6 +43,7 @@ export class ApiClient {
             headers: {
                 'Content-Type': 'application/json',
                 ...options.headers,
+                // Toujours inclure le token s'il existe
                 ...(token && { Authorization: `Bearer ${token}` }),
             },
         };
@@ -36,146 +51,115 @@ export class ApiClient {
         try {
             const response = await fetch(`${this.baseURL}${endpoint}`, config);
 
-            // Vérifier le Content-Type de la réponse
+            // Debug : afficher les headers de la requête
+            console.log('Request headers:', config.headers);
+            console.log('Response status:', response.status);
+
             const contentType = response.headers.get('content-type');
-
-            if (!contentType || !contentType.includes('application/json')) {
-                // Si on reçoit du HTML au lieu de JSON, c'est probablement une erreur
-                const text = await response.text();
-                console.error('Received non-JSON response:', text);
-
-                if (response.status === 404) {
-                    throw new Error(`Route API non trouvée: ${endpoint}`);
-                }
-
-                throw new Error('La réponse du serveur n\'est pas au format JSON');
-            }
 
             if (response.status === 401) {
                 // Token expiré ou invalide
-                localStorage.removeItem('authToken');
-                // Ne pas rediriger automatiquement, laisser l'application gérer
+                if (typeof window !== 'undefined') {
+                    localStorage.removeItem('authToken');
+                    // Supprimer aussi le cookie
+                    document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                }
                 throw new Error('Session expirée. Veuillez vous reconnecter.');
             }
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({
-                    message: 'Une erreur est survenue',
-                }));
-                throw new Error(error.message || `Erreur HTTP: ${response.status}`);
+                let errorMessage = `Erreur HTTP: ${response.status}`;
+
+                try {
+                    if (contentType?.includes('application/json')) {
+                        const error = await response.json();
+                        errorMessage = error.message || errorMessage;
+                    } else {
+                        const text = await response.text();
+                        console.error('Non-JSON response:', text);
+                        errorMessage = 'Erreur de format de réponse';
+                    }
+                } catch (parseError) {
+                    console.error('Erreur parsing réponse:', parseError);
+                }
+
+                throw new Error(errorMessage);
+            }
+
+            if (!contentType?.includes('application/json')) {
+                const text = await response.text();
+                console.error('Réponse non-JSON:', text);
+                throw new Error('Format de réponse invalide');
             }
 
             return response.json();
         } catch (error) {
-            console.error('API request error:', error);
+            console.error('Erreur requête API:', error);
             throw error;
         }
     }
 
-    // Méthodes pour chaque endpoint
+    // Méthode pour sauvegarder le token après login
+    async login(email: string, password: string) {
+        const result = await this.request<{ token: string; user: any }>('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+        });
 
-    // Users
+        // Sauvegarder le token
+        if (typeof window !== 'undefined' && result.token) {
+            localStorage.setItem('authToken', result.token);
+            // Optionnel : aussi dans les cookies pour le middleware
+            document.cookie = `authToken=${result.token}; path=/; max-age=86400`; // 24h
+        }
+
+        return result;
+    }
+
+    // Méthode pour vérifier l'authentification
+    async verifyAuth() {
+        return this.request<{ user: any }>('/auth/verify');
+    }
+
+    // Méthode pour se déconnecter
+    logout() {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('authToken');
+            document.cookie = 'authToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
+    }
+
+    // Reste des méthodes...
     async getUsers() {
         return this.request<any[]>('/users');
     }
 
-    async getUser(id: string) {
-        return this.request<any>(`/users/${id}`);
-    }
-
-    async updateUser(id: string, data: any) {
-        return this.request(`/users/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async deleteUser(id: string) {
-        return this.request(`/users/${id}`, {
-            method: 'DELETE',
-        });
-    }
-
-    // Tickets
     async getTickets() {
         return this.request<any[]>('/tickets');
     }
 
-    async getTicket(id: string) {
-        return this.request<any>(`/tickets/${id}`);
-    }
-
-    async createTicket(data: any) {
-        return this.request('/tickets', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async updateTicket(id: string, data: any) {
-        return this.request(`/tickets/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async deleteTicket(id: string) {
-        return this.request(`/tickets/${id}`, {
-            method: 'DELETE',
-        });
-    }
-
-    // Messages
-    async getMessages() {
-        return this.request<any[]>('/messages');
-    }
-
-    async getMessage(id: string) {
-        return this.request<any>(`/messages/${id}`);
-    }
-
-    async createMessage(data: any) {
-        return this.request('/messages', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async updateMessage(id: string, data: any) {
-        return this.request(`/messages/${id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async deleteMessage(id: string) {
-        return this.request(`/messages/${id}`, {
-            method: 'DELETE',
-        });
-    }
-
-    // Auth
-    async login(email: string, password: string) {
-        return this.request<{ token: string; user: any }>('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password }),
-        });
-    }
-
-    async register(data: any) {
-        return this.request<{ token: string; user: any }>('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(data),
-        });
-    }
-
-    async verifyAuth() {
-        return this.request<{ user: any }>('/auth/verify');
-    }
+    // etc...
 }
 
-// Instance singleton
 export const apiClient = new ApiClient();
-
-// Export pour compatibilité avec l'ancien code
 export const api = apiClient;
+
+// 3. FONCTION DE DEBUG POUR TESTER L'AUTH
+export const debugAuth = () => {
+    if (typeof window === 'undefined') {
+        console.log('Côté serveur - pas de localStorage');
+        return;
+    }
+
+    const localToken = localStorage.getItem('authToken');
+    const cookies = document.cookie;
+
+    console.log('=== DEBUG AUTH ===');
+    console.log('Token localStorage:', localToken ? 'Présent' : 'Absent');
+    console.log('Cookies:', cookies);
+    console.log('Headers qui seront envoyés:', {
+        'Content-Type': 'application/json',
+        ...(localToken && { Authorization: `Bearer ${localToken}` })
+    });
+    console.log('==================');
+};

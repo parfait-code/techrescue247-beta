@@ -1,19 +1,16 @@
+// 1. CORRECTION DU MIDDLEWARE (middleware.ts)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import jwt from 'jsonwebtoken';
 
-// Routes publiques qui ne nécessitent pas d'authentification
 const publicRoutes = [
     '/api/auth/login',
     '/api/auth/register',
-    '/api/messages', // POST uniquement
     '/api/contact',
 ];
 
-// Routes qui nécessitent le rôle admin
-const adminRoutes = [
-    '/api/users',
-    '/api/admin',
-];
+// Routes qui permettent POST sans auth mais GET avec auth
+const mixedRoutes = ['/api/messages'];
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
@@ -23,40 +20,49 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    // Permettre les routes publiques
+    // Permettre les routes complètement publiques
     if (publicRoutes.some(route => pathname.startsWith(route))) {
-        // Pour /api/messages, vérifier la méthode
-        if (pathname === '/api/messages' && request.method !== 'POST') {
-            // GET sur /api/messages nécessite l'authentification
-            const authHeader = request.headers.get('authorization');
-            if (!authHeader) {
-                return NextResponse.json(
-                    { message: 'Authorization header required' },
-                    { status: 401 }
-                );
-            }
-        }
         return NextResponse.next();
     }
 
-    // Vérifier l'en-tête Authorization pour les routes protégées
-    const authHeader = request.headers.get('authorization');
+    // Gestion spéciale pour /api/messages
+    if (pathname === '/api/messages' && request.method === 'POST') {
+        return NextResponse.next(); // POST autorisé sans auth
+    }
 
-    if (!authHeader) {
-        // Retourner une réponse JSON avec le bon Content-Type
+    // Pour toutes les autres routes, vérifier l'authentification
+    const authHeader = request.headers.get('authorization');
+    const cookieToken = request.cookies.get('authToken')?.value;
+
+    // Accepter le token depuis l'header OU les cookies
+    const token = authHeader?.replace('Bearer ', '') || cookieToken;
+
+    if (!token) {
         return NextResponse.json(
-            { message: 'Authorization header required' },
-            { status: 401 }
+            { message: 'Token d\'authentification requis' },
+            {
+                status: 401,
+                headers: { 'Content-Type': 'application/json' }
+            }
         );
     }
 
-    // Continuer avec la requête
-    const response = NextResponse.next();
+    // Optionnel : Vérifier la validité du token
+    // try {
+    //     if (process.env.JWT_SECRET) {
+    //         jwt.verify(token, process.env.JWT_SECRET);
+    //     }
+    // } catch (error) {
+    //     return NextResponse.json(
+    //         { message: 'Token invalide ou expiré' },
+    //         { 
+    //             status: 401,
+    //             headers: { 'Content-Type': 'application/json' }
+    //         }
+    //     );
+    // }
 
-    // S'assurer que toutes les réponses API ont le bon Content-Type
-    response.headers.set('Content-Type', 'application/json');
-
-    return response;
+    return NextResponse.next();
 }
 
 export const config = {
