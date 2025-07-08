@@ -19,12 +19,12 @@ import {
   LogOut,
   Settings,
   Ticket,
-  Shield,
   ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/store/hooks";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/slices/authSlice";
+import Image from "next/image";
 
 export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -66,10 +66,12 @@ export function Navbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-primary" />
-              <span className="text-xl sm:text-2xl font-bold text-gray-900">
-                TechRescue<span className="text-primary">247</span>
-              </span>
+              <Image
+                src={"/images/logo.png"}
+                height={80}
+                width={200}
+                alt="logo techrescue237"
+              />
             </Link>
           </div>
 

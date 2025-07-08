@@ -72,45 +72,13 @@ const features = [
   },
 ];
 
-// const faqs = [
-//   {
-//     question: "Quel est votre temps de réponse ?",
-//     answer:
-//       "Nous nous engageons à répondre dans les 2 heures pour les demandes urgentes et 24h pour les demandes standard.",
-//   },
-//   {
-//     question: "Proposez-vous un support d'urgence ?",
-//     answer:
-//       "Oui, notre équipe est disponible 24/7 pour les urgences critiques avec intervention sur site si nécessaire.",
-//   },
-//   {
-//     question: "Quels sont vos tarifs ?",
-//     answer:
-//       "Nous proposons des devis gratuits personnalisés selon vos besoins. Contactez-nous pour une évaluation.",
-//   },
-//   {
-//     question: "Couvrez-vous toute la région ?",
-//     answer:
-//       "Nous intervenons dans tout Yaoundé et les environs. Contactez-nous pour confirmer la couverture de votre zone.",
-//   },
-// ];
-
 export default function ContactPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
-      {/* Header */}
       <Navbar />
 
       {/* Contact Hero */}
-      <section className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 text-white py-20 overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/90 to-blue-800/90"></div>
-        <div className="absolute top-0 left-0 w-full h-full">
-          <div className="absolute top-10 left-10 w-32 h-32 bg-white/5 rounded-full blur-xl"></div>
-          <div className="absolute bottom-10 right-10 w-48 h-48 bg-white/5 rounded-full blur-xl"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/3 rounded-full blur-2xl"></div>
-        </div>
-
+      <section className="relative bg-gradient-to-br from-primary via-blue-600 to-primary text-white py-20 sm:py-24 overflow-hidden">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
             <MessageCircle className="w-4 h-4 text-blue-200" />
