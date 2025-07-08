@@ -104,7 +104,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* Hero Section avec HelpDesk */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-primary via-blue-600 to-primary text-white overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(0deg,transparent,rgba(255,255,255,0.5))]" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
           <div className="text-center">
