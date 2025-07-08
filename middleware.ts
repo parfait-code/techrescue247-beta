@@ -1,7 +1,6 @@
 // 1. CORRECTION DU MIDDLEWARE (middleware.ts)
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
 
 const publicRoutes = [
     '/api/auth/login',
@@ -9,8 +8,7 @@ const publicRoutes = [
     '/api/contact',
 ];
 
-// Routes qui permettent POST sans auth mais GET avec auth
-const mixedRoutes = ['/api/messages'];
+
 
 export function middleware(request: NextRequest) {
     const pathname = request.nextUrl.pathname;
@@ -46,21 +44,6 @@ export function middleware(request: NextRequest) {
             }
         );
     }
-
-    // Optionnel : Vérifier la validité du token
-    // try {
-    //     if (process.env.JWT_SECRET) {
-    //         jwt.verify(token, process.env.JWT_SECRET);
-    //     }
-    // } catch (error) {
-    //     return NextResponse.json(
-    //         { message: 'Token invalide ou expiré' },
-    //         { 
-    //             status: 401,
-    //             headers: { 'Content-Type': 'application/json' }
-    //         }
-    //     );
-    // }
 
     return NextResponse.next();
 }
